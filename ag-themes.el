@@ -162,7 +162,10 @@ If theme is not loaded, it loads it first"
                           "extracts face props based on display type"
                           (seq-reduce
                            (lambda (acc x)
-                             (pcase-let ((`(((,disp-type ,disp-val)) ,face-props) x))
+                             (pcase-let* ((`(((,disp-type ,disp-val)) . ,face-props) x)
+                                          (face-props (cond
+                                                       ((listp (car face-props)) (car face-props))
+                                                       ((listp face-props) face-props))))
                                (if acc acc
                                  ;; prioritize graphic & color displays
                                  (cond ((eq disp-val 'graphic) face-props)

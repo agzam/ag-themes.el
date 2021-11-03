@@ -17,6 +17,7 @@
 ;;  Description
 ;;
 ;;; Code:
+
 (defun color-get-face-colors (face)
   "Returns main FACE colors as a list of hex values"
   (delete-dups
@@ -76,6 +77,19 @@ color intensity (from lighter to darker)"
                     faces+colors)))
     (seq-map 'car filtered)))
 
+(require 'color)
+
+(defun plist-merge (&rest plists)
+  (if plists
+      (let ((result (copy-sequence (car plists))))
+        (while (setq plists (cdr plists))
+          (let ((plist (car plists)))
+            (while plist
+              (setq result (plist-put result (car plist) (car (cdr plist)))
+                    plist (cdr (cdr plist))))))
+        result)
+    nil))
+
 (defun color-theme-set-faces (theme faces-alist)
   "Modified version of `custom-theme-set-faces' that additionally
 allows to re-use existing faces by directly applying
@@ -98,39 +112,52 @@ Examples:
 
     ;; desaturate org-level-3 face background by 10%
     (org-level-3 (:background (color-desaturate-name 10)))))"
-  (let* ((_ (progn (defalias 'darker 'color-darken-name)
-                   (defalias 'lighter 'color-lighten-name)
-                   (defalias 'desaturate 'color-desaturate-name)
-                   (defalias 'saturate 'color-saturate-name)))
-         (resolve-face-prop (lambda (face face-prop)
+
+  (fset 'darker 'color-darken-name)
+  (fset 'lighter 'color-lighten-name)
+  (fset 'desaturate 'color-desaturate-name)
+  (fset 'saturate 'color-saturate-name)
+  (let* ((resolve-face-prop (lambda (face face-prop)
                               (pcase-let* ((`(,prop-name ,prop-val) face-prop)
                                            (`(,fn ,arg1 ,arg2 ,arg3) prop-val))
                                 (cond
-                                 ((not (fboundp fn)) face-prop)
-                                 (arg3 (list prop-name (funcall fn (face-attribute arg1 arg2) arg3)))
-                                 (arg2 (list prop-name (funcall fn (face-attribute face arg1) arg2)))
-                                 (arg1 (list prop-name (funcall fn (face-attribute face prop-name) arg1)))))))
+                                 ((eq fn 'quote) face-prop)
+                                 ((not (fboundp fn)) face-prop) ; fn set, but uknown
+                                 ;; fn called for another face and property
+                                 (arg3 (when-let ((other-face-props (car (alist-get arg1 faces-alist)))
+                                                  (prop-val (plist-get other-face-props arg2)))
+                                         (list prop-name (format "%s" (funcall fn prop-val arg3)))))
+                                 ;; fn called for the same face and property
+                                 (arg2 (when-let ((cur-face-props (car (alist-get face faces-alist)))
+                                                  (prop-val (plist-get cur-face-props arg1)))
+                                         (list prop-name (format "%s" (funcall fn prop-val arg2)))))
+                                 ;; fn called for the same property
+                                 (arg1 (when-let ((cur-face-props (car (alist-get face faces-alist)))
+                                                  (prop-val (plist-get cur-face-props prop-name)))
+                                         (list prop-name (format "%s" (funcall fn prop-val arg1)))))))))
          (resolve-face-props (lambda (face face-props)
                                (seq-mapcat
                                 (lambda (prop)
                                   (funcall resolve-face-prop face prop))
                                 (seq-partition face-props 2))))
          (reducer (lambda (acc face-spec)
-                    (pcase-let ((`(,face . ,face-props) face-spec))
-                      (add-to-list
-                       'acc
-                       (list face (list (list t (funcall resolve-face-props face face-props))))))))
+                    (pcase-let* ((`(,face ,face-props) face-spec)
+                                 (`(_ ((_ ,prev-props))) (seq-find (lambda (x) (eq (car x) face)) acc))
+                                 (new-props (plist-merge prev-props
+                                             (funcall resolve-face-props face face-props)))
+                                 ;; overwrite any previous face definition
+                                 (acc (seq-remove (lambda (x) (eq (car x) face)) acc)))
+                      (add-to-list 'acc `(,face ((t ,new-props))) :append))))
          (faces (seq-reduce reducer faces-alist '())))
     (apply 'custom-theme-set-faces theme faces)))
 
 (defun color-theme-get-faces (theme)
   "Get list of faces with their attributes of a given THEME.
 If theme is not loaded, it loads it first"
-  (let* ((theme (get theme 'theme-settings))
-         (theme-settings (if theme theme
-                           (progn
-                             (load-theme theme :no-ask :no-enable)
-                             (get theme 'theme-settings))))
+  (let* ((theme-settings (or (get theme 'theme-settings)
+                             (progn
+                               (load-theme theme :no-ask :no-enable)
+                               (get theme 'theme-settings))))
          (extract-props (lambda (props)
                           "extracts face props based on display type"
                           (seq-reduce
@@ -149,9 +176,80 @@ If theme is not loaded, it loads it first"
       (lambda (x)
         (pcase-let* ((`(,prop-type ,face _ . (,props)) x))
           (when (eq prop-type 'theme-face)
-           (list face (funcall extract-props props)))))
+            (list face (funcall extract-props props)))))
       theme-settings))))
 
+(defun ag-themes--modify-modeline-faces (face-attrs)
+  (let ((faces '(mode-line
+                 mode-line-buffer-id
+                 mode-line-emphasis
+                 mode-line-highlight
+                 mode-line-inactive
+
+                 persp-face-lighter-default
+                 persp-face-lighter-nil-persp
+                 persp-face-lighter-buffer-not-in-persp
+
+                 eyebrowse-mode-line-active
+                 eyebrowse-mode-line-inactive
+                 eyebrowse-mode-line-separator
+                 eyebrowse-mode-line-delimiters
+
+                 doom-modeline-buffer-timemachine
+                 doom-modeline-battery-error
+                 doom-modeline-battery-critical
+                 doom-modeline-battery-warning
+                 doom-modeline-battery-normal
+                 doom-modeline-battery-full
+                 doom-modeline-battery-charging
+                 doom-modeline-lsp-running
+                 doom-modeline-lsp-error
+                 doom-modeline-lsp-warning
+                 doom-modeline-lsp-success
+                 doom-modeline-repl-warning
+                 doom-modeline-repl-success
+                 doom-modeline-persp-buffer-not-in-persp
+                 doom-modeline-persp-name
+                 doom-modeline-evil-replace-state
+                 doom-modeline-evil-visual-state
+                 doom-modeline-evil-operator-state
+                 doom-modeline-evil-normal-state
+                 doom-modeline-evil-motion-state
+                 doom-modeline-evil-insert-state
+                 doom-modeline-evil-emacs-state
+                 doom-modeline-debug-visual
+                 doom-modeline-bar-inactive
+                 doom-modeline-bar
+                 doom-modeline-unread-number
+                 doom-modeline-notification
+                 doom-modeline-urgent
+                 doom-modeline-warning
+                 doom-modeline-info
+                 doom-modeline-debug
+                 doom-modeline-input-method-alt
+                 doom-modeline-input-method
+                 doom-modeline-host
+                 doom-modeline-panel
+                 doom-modeline-highlight
+                 doom-modeline-project-root-dir
+                 doom-modeline-project-dir
+                 doom-modeline-project-parent-dir
+                 doom-modeline-buffer-minor-mode
+                 doom-modeline-buffer-major-mode
+                 doom-modeline-buffer-modified
+                 doom-modeline-buffer-file
+                 doom-modeline-buffer-path
+                 doom-modeline-vspc-face
+                 doom-modeline-spc-face)))
+    (seq-map (lambda (x) `(,x ,face-attrs)) faces)))
+
+;;;###autoload
+(when load-file-name
+  (add-to-list 'custom-theme-load-path
+               (file-name-as-directory (file-name-directory load-file-name))))
+
+;;;### (autoloads nil "ag-themes-base16-ocean-theme" "ag-themes-base16-ocean-theme.el"
+;;;;;;  (0 0 0 0))
 
 (provide 'ag-themes)
 ;;; ag-themes.el ends here

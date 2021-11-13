@@ -90,7 +90,17 @@ color intensity (from lighter to darker)"
         result)
     nil))
 
-(defun color-theme-set-faces (theme faces-alist)
+
+(defun ag-themes--merge-face-specs (face &rest face-lists)
+  (apply
+   'plist-merge
+   (seq-map
+    'cadr
+    (seq-filter
+     (lambda (x) (eq (car x) face))
+     (apply 'append face-lists)))))
+
+(defun color-theme-set-faces (theme base-theme faces-alist)
   "Modified version of `custom-theme-set-faces' that additionally
 allows to re-use existing faces by directly applying
 modificications to them. Theme changes applied immediately.
@@ -117,39 +127,70 @@ Examples:
   (fset 'lighter 'color-lighten-name)
   (fset 'desaturate 'color-desaturate-name)
   (fset 'saturate 'color-saturate-name)
-  (let* ((resolve-face-prop (lambda (face face-prop)
-                              (pcase-let* ((`(,prop-name ,prop-val) face-prop)
-                                           (`(,fn ,arg1 ,arg2 ,arg3) prop-val))
-                                (cond
-                                 ((eq fn 'quote) face-prop)
-                                 ((not (fboundp fn)) face-prop) ; fn set, but uknown
-                                 ;; fn called for another face and property
-                                 (arg3 (when-let ((other-face-props (car (alist-get arg1 faces-alist)))
-                                                  (prop-val (plist-get other-face-props arg2)))
-                                         (list prop-name (format "%s" (funcall fn prop-val arg3)))))
-                                 ;; fn called for the same face and property
-                                 (arg2 (when-let ((cur-face-props (car (alist-get face faces-alist)))
-                                                  (prop-val (plist-get cur-face-props arg1)))
-                                         (list prop-name (format "%s" (funcall fn prop-val arg2)))))
-                                 ;; fn called for the same property
-                                 (arg1 (when-let ((cur-face-props (car (alist-get face faces-alist)))
-                                                  (prop-val (plist-get cur-face-props prop-name)))
-                                         (list prop-name (format "%s" (funcall fn prop-val arg1)))))))))
-         (resolve-face-props (lambda (face face-props)
-                               (seq-mapcat
-                                (lambda (prop)
-                                  (funcall resolve-face-prop face prop))
-                                (seq-partition face-props 2))))
-         (reducer (lambda (acc face-spec)
-                    (pcase-let* ((`(,face ,face-props) face-spec)
-                                 (`(_ ((_ ,prev-props))) (seq-find (lambda (x) (eq (car x) face)) acc))
-                                 (new-props (plist-merge prev-props
-                                             (funcall resolve-face-props face face-props)))
-                                 ;; overwrite any previous face definition
-                                 (acc (seq-remove (lambda (x) (eq (car x) face)) acc)))
-                      (add-to-list 'acc `(,face ((t ,new-props))) :append))))
-         (faces (seq-reduce reducer faces-alist '())))
-    (apply 'custom-theme-set-faces theme faces)))
+  (let* ((base-faces (color-theme-get-faces base-theme))
+
+         (resolve-face-prop
+          (lambda (face face-prop faces-so-far)
+            (pcase-let* ((`(,prop-name ,prop-val) face-prop)
+                         (`(,fn ,arg1 ,arg2 ,arg3) prop-val)
+                         (prev-props
+                          (ag-themes--merge-face-specs
+                           face
+                           base-faces
+                           faces-so-far)))
+              (cond
+               ((eq fn 'quote) face-prop)
+               ((not (fboundp fn)) face-prop) ; fn set, but uknown
+               ;; fn called for another face and propert
+               (arg3 (when-let ((other-props (ag-themes--merge-face-specs
+                                              arg1 base-faces faces-so-far))
+                                (prop-val (plist-get other-props arg2)))
+                       (list prop-name (format "%s" (funcall fn prop-val arg3)))))
+               ;; fn called for the same face and property
+               (arg2 (when-let ((prop-val (plist-get prev-props arg2)))
+                       (list prop-name (format "%s" (funcall fn prop-val arg2)))))
+               ;; fn called for the same property
+               (arg1 (when-let ((prop-val (plist-get prev-props prop-name)))
+                       (list prop-name (format "%s" (funcall fn prop-val arg1)))))))))
+
+         (resolve-face-props
+          (lambda (face face-props faces-so-far)
+            (seq-mapcat
+             (lambda (prop)
+               (funcall resolve-face-prop
+                        face prop faces-so-far))
+             (seq-partition face-props 2))))
+
+         (reducer
+          (lambda (acc face-spec)
+            (pcase-let*
+                ((`(,face ,face-props) face-spec)
+                 (prev-props
+                  (seq-map 'cadr
+                           (seq-filter
+                            (lambda (x) (eq (car x) face))
+                            (append base-faces acc))))
+
+                 (new-props
+                  (apply 'plist-merge
+                         (append
+                          prev-props
+                          (list (funcall resolve-face-props
+                                         face
+                                         face-props
+                                         acc)))))
+                 ;; overwrite any previous face definition
+                 (acc (seq-remove (lambda (x) (eq (car x) face)) acc))
+                 (new-el `(,face ,new-props)))
+              (push new-el acc))))
+         (faces (seq-reduce reducer (append
+                                     base-faces
+                                     faces-alist) '()))
+         (new-faces (seq-map
+                     (lambda (x)
+                       `(,(car x) ((t ,@(cdr x)))))
+                     faces)))
+    (apply 'custom-theme-set-faces theme new-faces)))
 
 (defun color-theme-get-faces (theme)
   "Get list of faces with their attributes of a given THEME.

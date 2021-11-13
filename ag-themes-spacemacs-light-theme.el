@@ -13,8 +13,7 @@
 
 (deftheme ag-themes-spacemacs-light "Customized theme based on spacemacs-light")
 
-(let* ((base-faces (color-theme-get-faces 'spacemacs-light))
-       (default-background "#fbf8ef")
+(let* ((default-background "#fbf8ef")
        (default-foreground "#655370")
        (bg-darker "#f7f4eb")
        (bg-accent "#dedae0")
@@ -22,10 +21,27 @@
        (bg-accent-darker "#b1adb3")
        (bg-accent-light "#efedf0")
        (fg-accent "CadetBlue")
-       (alter `((default (:background (lighter 1)))
-                (region (:inverse-video t :foreground ,bg-accent :background ,default-background :distant-foreground nil))
-                (fringe (:background ,bg-darker))
-                (shadow (:foreground ,bg-accent))
+       (faces `((default (:background (lighter 0)))
+                (window-divider (:foreground (lighter default :background 0)))
+                (window-divider-first-pixel (:foreground (lighter default :background 10)))
+                (window-divider-last-pixel (:foreground (lighter default :background 10)))
+                (mode-line (:underline nil :box (:color ,bg-accent) :background (darker default :background 8)))
+                (mode-line-inactive (:underline nil :box (:color ,bg-accent) :background (darker default :background 2)))
+                (doom-modeline (:inherit mode-line))
+                (doom-modeline-bar (:background (darker default :background 5)))
+                (doom-modeline-bar-inactive (:inherit fringe))
+                (cursor (:background "DarkGoldenrod2"))
+
+                (dired-subtree-depth-1-face (:background (darker dired-directory :background 2)))
+                (dired-subtree-depth-2-face (:background (darker dired-directory :background 6)))
+                (dired-subtree-depth-3-face (:background (darker dired-directory :background 8)))
+                (dired-subtree-depth-4-face (:background (darker dired-directory :background 10)))
+                (dired-subtree-depth-5-face (:background (darker dired-directory :background 15)))
+                (dired-subtree-depth-6-face (:background (darker dired-directory :background 20)))
+
+                ;; (region (:inverse-video t :foreground (darker default :background 20) :background nil :distant-foreground nil))
+                (fringe (:background (darker default :background 2)))
+                (shadow (:foreground ,bg-accent-dark))
                 (magit-diff-hunk-heading (:background ,bg-darker))
                 (magit-diff-hunk-heading-highlight (:background ,bg-accent-light))
                 (magit-diff-context-highlight (:background ,bg-darker))
@@ -48,12 +64,10 @@
                 (evil-ex-lazy-highlight (:background ,bg-accent))
                 (evil-ex-search (:background "DarkKhaki"))
                 (aw-leading-char-face (:height 5.0))
-                (mode-line (:background (darker default :background 3) :underline (:color "#b2b2b2")))
-                (mode-line-inactive (:background (darker default :background 1) :underline (:color "#d3d3e7")))
 
                 (fixed-pitch (:family "JetBrains Mono" :weight normal :width expanded))
                 (variable-pitch (:family "Open Sans" :weight normal
-                                           :width expanded :height 1.2))
+                                 :width expanded :height 1.2))
 
                 ;; (lsp-lens-face (:foreground ,default-foreground))
                 (lsp-ui-peek-list (:background "#f0ece1" :foreground "#866f94"))
@@ -102,16 +116,17 @@
                 (mm-uu-extract (:background "#efeae9"))
 
                 (cider-debug-code-overlay-face (:background ,bg-darker))
-                (ivy-posframe (:inherit default))
+                (ivy-posframe (:background (darker default :background 1)))
+                (ivy-posframe-border (:background (lighter default :foreground 5)))
 
                 (notmuch-wash-cited-text (:foreground ,bg-accent-darker))
                 (message-header-to (:foreground ,fg-accent))
                 (notmuch-crypto-signature-unknown (:foreground "#fdb8c0" :background nil))
-                (notmuch-crypto-signature-good-key (:foreground "DarkKhaki" :background nil)))))
-  (dolist (face (append alter (ag-themes--modify-modeline-faces '(:height 0.8))))
-    (add-to-list 'base-faces face :append))
-  (color-theme-set-faces
-   'ag-themes-spacemacs-light base-faces))
+                (notmuch-crypto-signature-good-key (:foreground "DarkKhaki" :background nil))))
+       (new-faces (append faces (ag-themes--modify-modeline-faces '(:height 0.8)))))
+  (color-theme-set-faces 'ag-themes-spacemacs-light
+                         'spacemacs-light
+                         new-faces))
 
 (provide-theme 'ag-themes-spacemacs-light)
 

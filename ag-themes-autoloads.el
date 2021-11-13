@@ -21,6 +21,15 @@
 
 ;;;***
 
+;;;### (autoloads "actual autoloads are elsewhere" "ag-themes-spacemacs-light-theme"
+;;;;;;  "ag-themes-spacemacs-light-theme.el" (24962 60779 957255
+;;;;;;  932000))
+;;; Generated autoloads from ag-themes-spacemacs-light-theme.el
+
+(register-definition-prefixes "ag-themes-spacemacs-light-theme" '("ag-themes-spacemacs-light"))
+
+;;;***
+
 (provide 'ag-themes-autoloads)
 ;; Local Variables:
 ;; version-control: never

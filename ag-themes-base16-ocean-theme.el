@@ -13,8 +13,7 @@
 
 (deftheme ag-themes-base16-ocean "Customized theme based on base16-ocean")
 
-(let* ((base-faces (color-theme-get-faces 'base16-ocean))
-       (base00 "#242938")
+(let* ((base00 "#242938")
        (base00*1 "#212533")
        (base01 "#343d46")
        (base02 "#4f5b66")
@@ -34,7 +33,24 @@
        (base10 "#7090af")
        (default-background base00)
        (default-foreground base05)
-       (alter `((default (:background (lighter 1.5)))
+       (faces `((default (:background (lighter 1.5)))
+                (window-divider (:foreground (lighter default :background 0)))
+                (window-divider-first-pixel (:foreground (lighter default :background 0)))
+                (window-divider-last-pixel (:foreground (lighter default :background 0)))
+                (mode-line (:underline nil :background (lighter default :background 3)))
+                (mode-line-inactive (:underline nil :background (lighter default :background 5)))
+                (doom-modeline-bar (:background (lighter default :background 20)))
+                (doom-modeline-bar-inactive (:inherit fringe))
+                (cursor (:background "DarkGoldenrod2"))
+                (show-paren-match (:background nil :foreground (lighter cursor :background 0) :underline t))
+                (dired-directory (:background (lighter default :background 1.5)))
+                (dired-subtree-depth-1-face (:background (lighter dired-directory :background 5)))
+                (dired-subtree-depth-2-face (:background (lighter dired-directory :background 8)))
+                (dired-subtree-depth-3-face (:background (lighter dired-directory :background 12)))
+                (dired-subtree-depth-4-face (:background (lighter dired-directory :background 15)))
+                (dired-subtree-depth-5-face (:background (lighter dired-directory :background 20)))
+                (dired-subtree-depth-6-face (:background (lighter dired-directory :background 30)))
+
                 ;; magit
                 (magit-popup-disabled-argument (:foreground ,base02))
                 (magit-popup-option-value (:foreground ,base08))
@@ -71,7 +87,7 @@
                 (region (:inverse-video t :foreground ,base03 :background ,default-background :distant-foreground nil))
                 (fixed-pitch (:family "JetBrains Mono" :weight normal :width expanded))
                 (variable-pitch (:family "Open Sans" :weight normal
-                                        :width expanded :height 1.2))
+                                 :width expanded :height 1.2))
                 ;; avy
                 (aw-leading-char-face (:height 5.0 :foreground "Orange"))
                 (avy-lead-face (:height 1.3 :foreground ,base0A))
@@ -117,8 +133,6 @@
                 ;; misc
                 (hl-line (:background "#2f3440"))
                 (trailing-whitespace (:background ,base01))
-                (mode-line (:underline (:color ,base01)))
-                (mode-line-inactive (:underline (:color ,base01)))
 
                 (line-number (:inherit fixed-pitch))
                 (ivy-posframe (:inherit default))
@@ -126,11 +140,12 @@
                 (notmuch-wash-cited-text (:foreground ,base03))
                 (message-header-to (:foreground ,base0C))
                 (notmuch-crypto-signature-unknown (:foreground ,base0E :background nil))
-                (notmuch-crypto-signature-good-key (:foreground ,base0A :background nil)))))
-  (dolist (face (append alter (ag-themes--modify-modeline-faces '(:height 0.8))))
-    (add-to-list 'base-faces face :append))
-  (color-theme-set-faces
-   'ag-themes-base16-ocean base-faces))
+                (notmuch-crypto-signature-good-key (:foreground ,base0A :background nil))))
+       (new-faces (append faces (ag-themes--modify-modeline-faces '(:height 0.8)))))
+  (color-theme-set-faces 'ag-themes-base16-ocean
+                         'base16-ocean
+                         new-faces))
+
 
 (provide-theme 'ag-themes-base16-ocean)
 

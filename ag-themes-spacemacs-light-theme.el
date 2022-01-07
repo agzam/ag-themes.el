@@ -122,7 +122,10 @@
                 (notmuch-wash-cited-text (:foreground ,bg-accent-darker))
                 (message-header-to (:foreground ,fg-accent))
                 (notmuch-crypto-signature-unknown (:foreground "#fdb8c0" :background nil))
-                (notmuch-crypto-signature-good-key (:foreground "DarkKhaki" :background nil))))
+                (notmuch-crypto-signature-good-key (:foreground "DarkKhaki" :background nil))
+
+                (code-review-pending-state-face (:foreground "DarkKhaki"))
+                (code-review-request-review-face (:foreground "yellow3"))))
        (new-faces (append faces (ag-themes--modify-modeline-faces '(:height 0.8)))))
   (color-theme-set-faces 'ag-themes-spacemacs-light
                          'spacemacs-light

@@ -132,7 +132,7 @@ Examples:
          (resolve-face-prop
           (lambda (face face-prop faces-so-far)
             (pcase-let* ((`(,prop-name ,prop-val) face-prop)
-                         (`(,fn ,arg1 ,arg2 ,arg3) prop-val)
+                         (`(,fn ,arg1 ,arg2 ,arg3) (when (listp prop-val) prop-val))
                          (prev-props
                           (ag-themes--merge-face-specs
                            face
@@ -203,9 +203,14 @@ If theme is not loaded, it loads it first"
                           "extracts face props based on display type"
                           (seq-reduce
                            (lambda (acc x)
-                             (pcase-let* ((`(((,disp-type ,disp-val)) . ,face-props) x)
+                             (pcase-let* ((`((,disp-type ,disp-val)) (if (listp (car x)) ; a guard for Emacs 27
+                                                                         (car x)         ; same shit works fine
+                                                                       (list ())))       ; without this bs in 28
+                                          (`(,face-props) (cdr x))
                                           (face-props (cond
-                                                       ((listp (car face-props)) (car face-props))
+                                                       ((and
+                                                         (listp face-props)
+                                                         (listp (car face-props))) (car face-props))
                                                        ((listp face-props) face-props))))
                                (if acc acc
                                  ;; prioritize graphic & color displays

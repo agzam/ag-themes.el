@@ -130,6 +130,8 @@
                 ;; code
                 (font-lock-doc-face (:foreground ,base02))
 
+                (term-color-blue (:foreground (lighter default :foreground 2)))
+
                 ;; misc
                 (hl-line (:background "#2f3440"))
                 (trailing-whitespace (:background ,base01))
@@ -140,7 +142,16 @@
                 (notmuch-wash-cited-text (:foreground ,base03))
                 (message-header-to (:foreground ,base0C))
                 (notmuch-crypto-signature-unknown (:foreground ,base0E :background nil))
-                (notmuch-crypto-signature-good-key (:foreground ,base0A :background nil))))
+                (notmuch-crypto-signature-good-key (:foreground ,base0A :background nil))
+
+                (tab-bar (:background (lighter default :background 3)))
+                (tab-bar-tab (:background (lighter default :background 20)
+                              :foreground (lighter default :foreground 0)
+                              :weight bold :box nil))
+                (tab-bar-tab-inactive (:background (lighter default :background 3)
+                                       :foreground (darker default :foreground 20)))
+
+                (lsp-lsp-flycheck-warning-unnecessary-face (:foreground ,base04))))
        (new-faces (append faces (ag-themes--modify-modeline-faces '(:height 0.8)))))
   (color-theme-set-faces 'ag-themes-base16-ocean
                          'base16-ocean

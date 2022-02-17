@@ -19,7 +19,7 @@
 ;;; Code:
 
 (defun color-get-face-colors (face)
-  "Returns main FACE colors as a list of hex values"
+  "Return main FACE colors as a list of hex values."
   (delete-dups
    (seq-remove
     'null
@@ -34,7 +34,7 @@
      '()))))
 
 (defun color-sort-colors (colors)
-  "Sort given list of colors from the lightest shade to the darkest"
+  "Sort given list of COLORS from the lightest shade to the darkest."
   (seq-map
    (lambda (x) (car x))
    (sort
@@ -46,8 +46,8 @@
       (< (cadr y) (cadr x))))))
 
 (defun color-get-theme-palette ()
-  "Return all the main colors used in the loaded theme, sorted by
-color intensity (from lighter to darker)"
+  "Return all the main colors used in the loaded theme.
+Sorted by color intensity (from lighter to darker)"
   (color-sort-colors
    (delete-dups
     (seq-mapcat 'color-get-face-colors (face-list)))))
@@ -80,6 +80,7 @@ color intensity (from lighter to darker)"
 (require 'color)
 
 (defun plist-merge (&rest plists)
+  "Merge two PLISTS."
   (if plists
       (let ((result (copy-sequence (car plists))))
         (while (setq plists (cdr plists))
@@ -90,8 +91,8 @@ color intensity (from lighter to darker)"
         result)
     nil))
 
-
 (defun ag-themes--merge-face-specs (face &rest face-lists)
+  "Merges properties from multiple FACE-LISTS into single FACE."
   (apply
    'plist-merge
    (seq-map
@@ -101,12 +102,15 @@ color intensity (from lighter to darker)"
      (apply 'append face-lists)))))
 
 (defun color-theme-set-faces (theme base-theme faces-alist)
-  "Modified version of `custom-theme-set-faces' that additionally
-allows to re-use existing faces by directly applying
-modificications to them. Theme changes applied immediately.
+  "Modified version of `custom-theme-set-faces'.
+
+Allows relative (darker, lighter, etc.) changes to existing faces
+in the BASE-THEME. FACES-ALIST is a list of modified faces and
+their properties. Applied modifications get reflected in a new
+THEME.
 
 Examples:
-(color-theme-set-faces 'zenburn
+\\(color-theme-set-faces 'new-zenburn 'zenburn
   `(
     ;; set foreground to green and use background color of the
     ;; same face (default of zenburn theme) but make it darker by 10%

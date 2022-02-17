@@ -131,6 +131,7 @@
                 (font-lock-doc-face (:foreground ,base02))
 
                 (term-color-blue (:foreground (lighter default :foreground 2)))
+                (ansi-color-blue (:foreground "#00bfff" :background "#00bfff"))
 
                 ;; misc
                 (hl-line (:background "#2f3440"))

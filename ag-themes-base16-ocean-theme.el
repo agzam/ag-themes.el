@@ -3,23 +3,28 @@
 ;; Author: Ag Ibragimov
 ;; URL: https://github.com/agzam/ag-themes.el
 ;; Created: Nov-2021
-;; Keywords: color theme
+;; Keywords: faces
 ;; License: GPL v3
 ;; Package-Requires: ((emacs "27"))
 ;; Version: 1.0.0
+;;
+;;; Commentary:
+;;
+;;  Description
+;; Customized theme based on base-16-ocean
+;;; Code:
 
 (require 'ag-themes)
 (require 'base16-ocean-theme)
 
-(deftheme ag-themes-base16-ocean "Customized theme based on base16-ocean")
+(deftheme ag-themes-base16-ocean "Customized theme based on base16-ocean.")
 
-(let* ((base00 "#242938")
-       (base00*1 "#212533")
+(let* ((base00 "#2e323c")
        (base01 "#343d46")
        (base02 "#4f5b66")
        (base03 "#65737e")
        (base04 "#a7adba")
-       (base05 "#c0c5ce")
+       ;; (base05 "#c0c5ce")
        (base06 "#dfe1e8")
        (base07 "#eff1f5")
        (base08 "#bf616a")
@@ -29,11 +34,11 @@
        (base0C "#96b5b4")
        (base0D "#8fa1b3")
        (base0E "#b48ead")
-       (base0F "#ab7967")
+       ;; (base0F "#ab7967")
        (base10 "#7090af")
        (default-background base00)
-       (default-foreground base05)
-       (faces `((default (:background (lighter 1.5)))
+       ;; (default-foreground base05)
+       (faces `((default (:background (lighter 5)))
                 (window-divider (:foreground (lighter default :background 0)))
                 (window-divider-first-pixel (:foreground (lighter default :background 0)))
                 (window-divider-last-pixel (:foreground (lighter default :background 0)))
@@ -152,7 +157,7 @@
                 (tab-bar-tab-inactive (:background (lighter default :background 3)
                                        :foreground (darker default :foreground 20)))
 
-                (lsp-lsp-flycheck-warning-unnecessary-face (:foreground ,base04))))
+                (lsp-lsp-flycheck-warning-unnecessary-face (:foreground ,base03 :background ,base01))))
        (new-faces (append faces (ag-themes--modify-modeline-faces '(:height 0.8)))))
   (color-theme-set-faces 'ag-themes-base16-ocean
                          'base16-ocean
@@ -162,3 +167,4 @@
 (provide-theme 'ag-themes-base16-ocean)
 
 (provide 'ag-themes-base16-ocean-theme)
+;;; ag-themes-base16-ocean-theme.el ends here

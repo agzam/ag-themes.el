@@ -3,15 +3,21 @@
 ;; Author: Ag Ibragimov
 ;; URL: https://github.com/agzam/ag-themes.el
 ;; Created: Nov-2021
-;; Keywords: color theme
+;; Keywords: faces
 ;; License: GPL v3
 ;; Package-Requires: ((emacs "27"))
 ;; Version: 1.0.0
+;;
+;;; Commentary:
+;;
+;;  Description
+;; Customized theme based on spacemacs-light
+;;; Code:
 
 (require 'ag-themes)
 (require 'spacemacs-light-theme)
 
-(deftheme ag-themes-spacemacs-light "Customized theme based on spacemacs-light")
+(deftheme ag-themes-spacemacs-light "Customized theme based on spacemacs-light.")
 
 (let* ((default-background "#fbf8ef")
        (default-foreground "#655370")
@@ -134,3 +140,4 @@
 (provide-theme 'ag-themes-spacemacs-light)
 
 (provide 'ag-themes-spacemacs-light-theme)
+;;; ag-themes-spacemacs-light-theme.el ends here

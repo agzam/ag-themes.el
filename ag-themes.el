@@ -233,11 +233,12 @@ If theme is not loaded, it loads it first"
       theme-settings))))
 
 (defun ag-themes--modify-modeline-faces (face-attrs)
-  (let ((faces '(mode-line
+  (let ((faces '(
+                 ;; mode-line
                  mode-line-buffer-id
                  mode-line-emphasis
                  mode-line-highlight
-                 mode-line-inactive
+                 ;; mode-line-inactive
 
                  persp-face-lighter-default
                  persp-face-lighter-nil-persp

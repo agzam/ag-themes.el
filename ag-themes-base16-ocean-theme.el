@@ -21,7 +21,7 @@
 
 (let* ((base00 "#2e323c")
        (base01 "#343d46")
-       (base02 "#4f5b66")
+       (base02 "#5b6a78")
        (base03 "#65737e")
        (base04 "#a7adba")
        ;; (base05 "#c0c5ce")
@@ -158,7 +158,7 @@
                                        :foreground (darker default :foreground 20)))
 
                 (lsp-lsp-flycheck-warning-unnecessary-face (:foreground ,base03 :background ,base01))))
-       (new-faces (append faces (ag-themes--modify-modeline-faces '(:height 0.8)))))
+       (new-faces (append faces (ag-themes--modify-modeline-faces '(:height 0.85)))))
   (color-theme-set-faces 'ag-themes-base16-ocean
                          'base16-ocean
                          new-faces))

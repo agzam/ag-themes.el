@@ -131,8 +131,9 @@
                 (notmuch-crypto-signature-good-key (:foreground "DarkKhaki" :background nil))
 
                 (code-review-pending-state-face (:foreground "DarkKhaki"))
-                (code-review-request-review-face (:foreground "yellow3"))))
-       (new-faces (append faces (ag-themes--modify-modeline-faces '(:height 0.8)))))
+                (code-review-request-review-face (:foreground "yellow3"))
+                (completions-annotations (:foreground ,bg-accent-darker))))
+       (new-faces (append faces (ag-themes--modify-modeline-faces '(:height 0.85)))))
   (color-theme-set-faces 'ag-themes-spacemacs-light
                          'spacemacs-light
                          new-faces))

@@ -71,7 +71,7 @@ Sorted by color intensity (from lighter to darker)"
                                                        (color-name-to-rgb c))))
                                               (`(,r1 ,g1 ,b1) (funcall conv color))
                                               (`(,r2 ,g2 ,b2) (funcall conv clr)))
-                                   (and (= r1 r2) (= g1 g2) (= b2 b2))))
+                                   (and (= r1 r2) (= g1 g2) (= b1 b2))))
                                colors)
                           face)))
                     faces+colors)))
@@ -110,8 +110,8 @@ their properties. Applied modifications get reflected in a new
 THEME.
 
 Examples:
-\\(color-theme-set-faces 'new-zenburn 'zenburn
-  `(
+\\(color-theme-set-faces \\'new-zenburn \\'zenburn
+  \\`(
     ;; set foreground to green and use background color of the
     ;; same face (default of zenburn theme) but make it darker by 10%
     (default (:foreground \"green\" :background (darker 10)))
@@ -121,7 +121,7 @@ Examples:
     (mode-line (:background (lighter :foreground 20)))))
 
     ;; use background color of org-level-1 face,
-    ;; make it a bit darker and use that for org-level-2's foreground
+    ;; make it a bit darker and use that for org-level-2 foreground
     (org-level-2 (:foreground (darker org-level-1 :background 15)))
 
     ;; desaturate org-level-3 face background by 10%
@@ -233,6 +233,7 @@ If theme is not loaded, it loads it first"
       theme-settings))))
 
 (defun ag-themes--modify-modeline-faces (face-attrs)
+  "Set modeline faces with `FACE-ATTRS'."
   (let ((faces '(
                  ;; mode-line
                  mode-line-buffer-id

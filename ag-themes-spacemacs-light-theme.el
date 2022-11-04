@@ -31,8 +31,8 @@
                 (window-divider (:foreground (lighter default :background 0)))
                 (window-divider-first-pixel (:foreground (lighter default :background 10)))
                 (window-divider-last-pixel (:foreground (lighter default :background 10)))
-                (mode-line (:underline nil :box (:color ,bg-accent) :background (darker default :background 8)))
-                (mode-line-inactive (:underline nil :box (:color ,bg-accent) :background (darker default :background 2)))
+                (mode-line (:underline unspecified :box (:color ,bg-accent) :background (darker default :background 8)))
+                (mode-line-inactive (:underline unspecified :box (:color ,bg-accent) :background (darker default :background 2)))
                 (doom-modeline (:inherit mode-line))
                 (doom-modeline-bar (:background (darker default :background 5)))
                 (doom-modeline-bar-inactive (:inherit fringe))
@@ -45,7 +45,7 @@
                 (dired-subtree-depth-5-face (:background (darker dired-directory :background 15)))
                 (dired-subtree-depth-6-face (:background (darker dired-directory :background 20)))
 
-                ;; (region (:inverse-video t :foreground (darker default :background 20) :background nil :distant-foreground nil))
+                ;; (region (:inverse-video t :foreground (darker default :background 20) :background unspecified :distant-foreground unspecified))
                 (fringe (:background (darker default :background 2)))
                 (shadow (:foreground ,bg-accent-dark))
                 (magit-diff-hunk-heading (:background ,bg-darker))
@@ -71,7 +71,7 @@
                 (evil-ex-search (:background "DarkKhaki"))
                 (aw-leading-char-face (:height 5.0))
 
-                (fixed-pitch (:family "JetBrains Mono" :weight normal :width expanded))
+                (fixed-pitch (:family "JetBrains Mono" :weight normal :width expanded) :height unspecified)
                 (variable-pitch (:family "Open Sans" :weight normal
                                  :width expanded :height 1.2))
 
@@ -80,7 +80,7 @@
                 (lsp-ui-peek-peek (:background "#f0ece1"))
                 (lsp-ui-peek-footer (:background ,bg-accent))
                 (lsp-ui-peek-header (:background ,bg-accent))
-                (lsp-ui-peek-highlight (:background "#f5f1e6" :foreground "#8b7b96" :box nil))
+                (lsp-ui-peek-highlight (:background "#f5f1e6" :foreground "#8b7b96" :box unspecified))
                 (lsp-ui-peek-filename (:background "#f0ece1" :foreground "#c0a9cf"))
                 (lsp-ui-peek-selection (:background ,bg-accent))
 
@@ -127,8 +127,8 @@
 
                 (notmuch-wash-cited-text (:foreground ,bg-accent-darker))
                 (message-header-to (:foreground ,fg-accent))
-                (notmuch-crypto-signature-unknown (:foreground "#fdb8c0" :background nil))
-                (notmuch-crypto-signature-good-key (:foreground "DarkKhaki" :background nil))
+                (notmuch-crypto-signature-unknown (:foreground "#fdb8c0" :background unspecified))
+                (notmuch-crypto-signature-good-key (:foreground "DarkKhaki" :background unspecified))
 
                 (code-review-pending-state-face (:foreground "DarkKhaki"))
                 (code-review-request-review-face (:foreground "yellow3"))

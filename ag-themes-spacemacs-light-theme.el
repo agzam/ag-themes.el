@@ -72,8 +72,7 @@
                 (aw-leading-char-face (:height 5.0))
 
                 (fixed-pitch (:family "JetBrains Mono" :weight normal :width expanded) :height unspecified)
-                (variable-pitch (:family "Open Sans" :weight normal
-                                 :width expanded :height 1.2))
+                (variable-pitch (:family "Karla" :weight normal :width expanded))
 
                 ;; (lsp-lens-face (:foreground ,default-foreground))
                 (lsp-ui-peek-list (:background "#f0ece1" :foreground "#866f94"))

@@ -131,7 +131,10 @@
 
                 (code-review-pending-state-face (:foreground "DarkKhaki"))
                 (code-review-request-review-face (:foreground "yellow3"))
-                (completions-annotations (:foreground ,bg-accent-darker))))
+                (completions-annotations (:foreground ,bg-accent-darker))
+
+                (elfeed-search-title-face (:foreground ,bg-accent-dark))
+                (elfeed-search-feed-face (:foreground "wheat3"))))
        (new-faces (append faces (ag-themes--modify-modeline-faces '(:height 0.85)))))
   (color-theme-set-faces 'ag-themes-spacemacs-light
                          'spacemacs-light

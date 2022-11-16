@@ -156,7 +156,12 @@
                 (tab-bar-tab-inactive (:background (lighter default :background 3)
                                        :foreground (darker default :foreground 20)))
 
-                (lsp-lsp-flycheck-warning-unnecessary-face (:foreground ,base03 :background ,base01))))
+                (lsp-lsp-flycheck-warning-unnecessary-face (:foreground ,base03 :background ,base01))
+
+                (elfeed-search-title-face (:foreground ,base03))
+                (elfeed-search-unread-title-face (:foreground ,base04))
+                (elfeed-search-feed-face (:foreground ,base0A))
+                (elfeed-search-tag-face (:foreground ,base0B))))
        (new-faces (append faces (ag-themes--modify-modeline-faces '(:height 0.85)))))
   (color-theme-set-faces 'ag-themes-base16-ocean
                          'base16-ocean

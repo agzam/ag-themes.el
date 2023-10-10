@@ -91,7 +91,7 @@
 
                 (region (:inverse-video t :foreground ,base03 :background ,default-background :distant-foreground unspecified))
                 (fixed-pitch (:family "JetBrains Mono" :weight normal :width expanded :height unspecified))
-                (variable-pitch (:family "Karla" :weight normal :width expanded))
+                (variable-pitch (:family "Verdana" :weight normal :width expanded))
                 ;; avy
                 (aw-leading-char-face (:height 5.0 :foreground "Orange"))
                 (avy-lead-face (:height 1.3 :foreground ,base0A))

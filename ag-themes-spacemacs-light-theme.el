@@ -55,6 +55,19 @@
                 (magit-diff-added-highlight (:foreground "#325e0b" :background "#e6ffed"))
                 (magit-diff-removed (:foreground "#ef6160" :background "#ffeef0"))
                 (magit-diff-removed-highlight (:foreground "#d80d0d" :background "#ffeef0"))
+
+                (magit-blame-culprit (:background "#f6f1e1" :foreground "#b1951d"))
+                (magit-blame-date    (:background "#f6f1e1" :foreground "#67b11d"))
+                (magit-blame-hash    (:background "#f6f1e1" :foreground "#6c3163"))
+                (magit-blame-header  (:background "#f6f1e1" :foreground "#67b11d"))
+                (magit-blame-heading (:background "#f6f1e1" :foreground "#67b11d"))
+                (magit-blame-name    (:background "#f6f1e1" :foreground "#b1951d"))
+                (magit-blame-sha1    (:background "#f6f1e1" :foreground "#6c3163"))
+                (magit-blame-subject (:background "#f6f1e1" :foreground "#b1951d"))
+                (magit-blame-summary (:background "#f6f1e1" :foreground "#b1951d"))
+                (magit-blame-time    (:background "#f6f1e1" :foreground "#67b11d"))
+
+
                 (diff-refine-added (:foreground "#325e0b" :background "#acf2bd"))
                 (diff-refine-removed (:foreground "#d80d0d" :background "#fdb8c0"))
                 (smerge-upper (:foreground "#d80d0d" :background "#fdb8c0"))

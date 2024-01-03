@@ -156,8 +156,8 @@
                 (tab-bar-tab-inactive (:background (lighter default :background 3)
                                        :foreground (darker default :foreground 20)))
 
-                (lsp-lsp-flycheck-warning-unnecessary-face (:foreground ,base03 :background ,base01))
-
+                (lsp-lsp-flycheck-warning-unnecessary-face (:foreground "gray60" :background ,base01))
+                (cider-debug-code-overlay-face (:background "#f0ece1"))
                 (elfeed-search-title-face (:foreground ,base03))
                 (elfeed-search-unread-title-face (:foreground ,base04))
                 (elfeed-search-feed-face (:foreground ,base0A))

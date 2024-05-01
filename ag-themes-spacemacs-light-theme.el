@@ -147,7 +147,9 @@
                 (completions-annotations (:foreground ,bg-accent-darker))
 
                 (elfeed-search-title-face (:foreground ,bg-accent-dark))
-                (elfeed-search-feed-face (:foreground "wheat3"))))
+                (elfeed-search-feed-face (:foreground "wheat3"))
+
+                (yas-field-highlight-face (:inherit match))))
        (new-faces (append faces (ag-themes--modify-modeline-faces '(:height 0.85)))))
   (color-theme-set-faces 'ag-themes-spacemacs-light
                          'spacemacs-light

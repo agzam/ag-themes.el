@@ -44,7 +44,11 @@
                 (dired-subtree-depth-4-face (:background (lighter dired-directory :background 15)))
                 (dired-subtree-depth-5-face (:background (lighter dired-directory :background 20)))
                 (dired-subtree-depth-6-face (:background (lighter dired-directory :background 30)))
-                (aw-leading-char-face (:height 5.0))))
+                (aw-leading-char-face (:height 5.0))
+                (org-meta-line (:foreground "#b6b9c4"))
+                (org-block-begin-line (:extend t))
+                (org-block-end-line (:extend t :inherit org-block-begin-line))
+                (org-modern-indent-bracket-line (:background "#cbccd1" :height 1.3 :inherit org-meta-line))))
        (new-faces (append faces (ag-themes--modify-modeline-faces '(:height 0.85)))))
   (color-theme-set-faces 'ag-themes-base16-tokyo-night-light
                          'base16-tokyo-night-light

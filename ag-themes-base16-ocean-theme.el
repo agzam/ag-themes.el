@@ -90,7 +90,7 @@
                 (ahs-face (:foreground ,base0A :background ,base02))
 
                 (region (:inverse-video t :foreground ,base03 :background ,default-background :distant-foreground unspecified))
-                (fixed-pitch (:family "JetBrains Mono" :weight normal :width expanded :height unspecified))
+                (fixed-pitch (:family "JetBrains Mono" :weight normal :width expanded :height 1.0))
                 (variable-pitch (:family "Verdana" :weight normal :width expanded))
                 ;; avy
                 (aw-leading-char-face (:height 5.0 :foreground "Orange"))
@@ -102,15 +102,16 @@
                 ;; org-mode
                 (org-link (:underline t :foreground ,base0B))
                 (org-todo (:weight bold :foreground ,base0A :inherit fixed-pitch))
-                (org-block-begin-line (:underline unspecified :background ,base01 :foreground ,base04 :height 0.9 :weight ultra-light :inherit fixed-pitch))
+                (org-block-begin-line (:underline unspecified :background ,base01 :foreground ,base04 :height 0.9 :weight ultra-light :inherit fixed-pitch :extend t))
                 (org-block (:background ,base01 :inherit fixed-pitch))
-                (org-block-end-line (:overline unspecified :background ,base01 :height 0.9 :weight ultra-light :inherit fixed-pitch))
+                (org-block-end-line (:overline unspecified :background ,base01 :height 0.9 :weight ultra-light :inherit fixed-pitch :extend t))
+                (org-modern-indent-bracket-line (:background ,base01 :height 1.3 :inherit org-meta-line))
                 (org-verse (:inherit (variable-pitch org-block)))
                 (org-quote (:inherit (org-verse) :slant normal))
                 (org-date (:inherit fixed-pitch))
                 (org-code (:inherit fixed-pitch :foreground ,base06))
                 (org-verbatim (:inherit fixed-pitch))
-                (org-meta-line (:inherit fixed-pitch :foreground ,base04 :height 0.9 :weight ultra-light))
+                (org-meta-line (:inherit fixed-pitch :foreground ,base02 :height 0.9 :weight ultra-light))
                 (org-checkbox (:background unspecified :inherit fixed-pitch))
                 (org-table (:inherit fixed-pitch))
                 (org-level-1 (:foreground ,base0D :bold t :height 1.3))

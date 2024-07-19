@@ -84,7 +84,7 @@
                 (evil-ex-search (:background "DarkKhaki"))
                 (aw-leading-char-face (:height 5.0))
 
-                (fixed-pitch (:family "JetBrains Mono" :weight normal :width expanded) :height unspecified)
+                (fixed-pitch (:family "JetBrains Mono" :weight normal :width expanded :height 1.0))
                 (variable-pitch (:family "Verdana" :weight normal :width expanded))
 
                 ;; (lsp-lens-face (:foreground ,default-foreground))
@@ -105,16 +105,17 @@
                 ;; (lsp-ui-sideline-global (:foreground ,default-foreground))
 
                 ;; org-mode
-                (org-block-begin-line (:background ,bg-darker :foreground ,fg-accent :height 0.9 :weight ultra-light :inherit fixed-pitch))
+                (org-block-begin-line (:background ,bg-darker :foreground ,bg-accent-darker :height 0.9 :weight ultra-light :inherit fixed-pitch))
                 (org-block (:background ,bg-darker :inherit fixed-pitch))
-                (org-block-end-line (:background ,bg-darker :foreground ,fg-accent :height 0.9 :weight ultra-light :inherit fixed-pitch))
+                (org-block-end-line (:background ,bg-darker :foreground ,bg-accent-darker :height 0.9 :weight ultra-light :inherit fixed-pitch))
+                (org-modern-indent-bracket-line (:background ,bg-darker :height 1.3 :inherit org-meta-line))
                 (org-verse (:inherit (variable-pitch org-block)))
                 (org-quote (:inherit (org-verse) :slant normal))
                 (org-date (:inherit fixed-pitch))
                 (org-code (:inherit fixed-pitch :foreground ,fg-accent))
                 (org-verbatim (:inherit fixed-pitch))
                 (info-quoted-name (:inherit fixed-pitch))
-                (org-meta-line (:inherit fixed-pitch :foreground ,fg-accent :height 0.9 :weight ultra-light))
+                (org-meta-line (:inherit fixed-pitch :foreground ,bg-accent :height 0.9 :weight ultra-light))
                 (org-special-keyword (:inherit fixed-pitch))
                 (org-checkbox (:inherit fixed-pitch))
                 (org-table (:inherit fixed-pitch))

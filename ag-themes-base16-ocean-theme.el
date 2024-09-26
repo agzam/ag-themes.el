@@ -162,7 +162,8 @@
                 (elfeed-search-title-face (:foreground ,base03))
                 (elfeed-search-unread-title-face (:foreground ,base04))
                 (elfeed-search-feed-face (:foreground ,base0A))
-                (elfeed-search-tag-face (:foreground ,base0B))))
+                (elfeed-search-tag-face (:foreground ,base0B))
+                (pulse-highlight-start-face (:background "orange1"))))
        (new-faces (append faces (ag-themes--modify-modeline-faces '(:height 0.85)))))
   (color-theme-set-faces 'ag-themes-base16-ocean
                          'base16-ocean

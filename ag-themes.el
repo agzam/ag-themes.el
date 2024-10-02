@@ -1,9 +1,9 @@
 ;;; ag-themes.el --- Customized color themes -*- lexical-binding: t; -*-
 ;;
-;; Copyright (C) 2021 Ag Ibragimomv
+;; Copyright (C) 2021 Ag Ibragimov
 ;;
-;; Author: Ag Ibragimomv <https://github.com/agzam/ag-themes.el>
-;; Maintainer: Ag Ibragimomv <agzam.ibragimov@gmail.com>
+;; Author: Ag Ibragimov <https://github.com/agzam/ag-themes.el>
+;; Maintainer: Ag Ibragimov <agzam.ibragimov@gmail.com>
 ;; Created: November 02, 2021
 ;; Version: 0.0.1
 ;; Keywords: faces

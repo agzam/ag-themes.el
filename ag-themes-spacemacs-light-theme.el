@@ -67,7 +67,11 @@
                 (magit-blame-summary (:background "#f6f1e1" :foreground "#b1951d"))
                 (magit-blame-time    (:background "#f6f1e1" :foreground "#67b11d"))
 
-
+                (diff-added (:foreground "#325e0b"))
+                (diff-indicator-added (:foreground "#325e0b"))
+                (diff-removed (:foreground "#d80d0d"))
+                (diff-indicator-added (:foreground "#d80d0d"))
+                (diff-refine-removed (:foreground "#d80d0d" :background "#fdb8c0"))
                 (diff-refine-added (:foreground "#325e0b" :background "#acf2bd"))
                 (diff-refine-removed (:foreground "#d80d0d" :background "#fdb8c0"))
                 (smerge-upper (:foreground "#d80d0d" :background "#fdb8c0"))

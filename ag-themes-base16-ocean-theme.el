@@ -61,11 +61,13 @@
                 (magit-popup-option-value (:foreground ,base08))
                 (magit-popup-argument (:foreground ,base08))
 
+                (magit-branch-remote (:background nil))
+                (magit-branch-local (:background nil))
                 (magit-diff-context-highlight (:background ,default-background))
-                (magit-diff-removed (:foreground ,base08))
-                (magit-diff-added (:foreground ,base0B))
-                (magit-diff-removed-highlight (:foreground "#ef6160"))
-                (magit-diff-added-highlight (:foreground "#a3be70"))
+                (magit-diff-removed (:foreground ,base08 :background nil))
+                (magit-diff-added (:foreground ,base0B :background nil))
+                (magit-diff-removed-highlight (:foreground "#ef6160" :background nil))
+                (magit-diff-added-highlight (:foreground "#a3be70" :background nil))
                 (magit-section-highlight (:background "#2f343f"))
                 (magit-diff-hunk-heading (:background "#2f343f"))
                 (magit-diff-hunk-heading-highlight (:background "#2f363f"))
@@ -113,7 +115,7 @@
                 (org-verbatim (:inherit fixed-pitch))
                 (org-meta-line (:inherit fixed-pitch :foreground ,base02 :height 0.9 :weight ultra-light))
                 (org-checkbox (:background unspecified :inherit fixed-pitch))
-                (org-table (:inherit fixed-pitch))
+                (org-table (:inherit fixed-pitch :background nil))
                 (org-level-1 (:foreground ,base0D :bold t :height 1.3))
                 (org-level-2 (:foreground ,base09 :bold t :height 1.2))
                 (org-level-3 (:foreground ,base0B :height 1.1))
@@ -134,6 +136,8 @@
 
                 ;; code
                 (font-lock-doc-face (:foreground ,base02))
+                (font-lock-comment-face (:background nil))
+                (font-lock-warning-face (:background nil))
 
                 (term-color-blue (:foreground (lighter default :foreground 2)))
                 (ansi-color-blue (:foreground "#00bfff" :background "#00bfff"))

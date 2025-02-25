@@ -56,6 +56,7 @@
                 (magit-diff-removed (:foreground "#ef6160" :background "#ffeef0"))
                 (magit-diff-removed-highlight (:foreground "#d80d0d" :background "#ffeef0"))
 
+                (magit-header-line (:background nil))
                 (magit-blame-culprit (:background "#f6f1e1" :foreground "#b1951d"))
                 (magit-blame-date    (:background "#f6f1e1" :foreground "#67b11d"))
                 (magit-blame-hash    (:background "#f6f1e1" :foreground "#6c3163"))
@@ -67,6 +68,9 @@
                 (magit-blame-summary (:background "#f6f1e1" :foreground "#b1951d"))
                 (magit-blame-time    (:background "#f6f1e1" :foreground "#67b11d"))
 
+                (diff-header (:background ,bg-darker))
+                (diff-file-header (:background ,bg-darker))
+                (diff-hunk-header (:background ,bg-darker))
                 (diff-added (:foreground "#325e0b"))
                 (diff-indicator-added (:foreground "#325e0b"))
                 (diff-removed (:foreground "#d80d0d"))

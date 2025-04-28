@@ -158,7 +158,8 @@
                 (elfeed-search-title-face (:foreground ,bg-accent-dark))
                 (elfeed-search-feed-face (:foreground "wheat3"))
 
-                (yas-field-highlight-face (:inherit match))))
+                (yas-field-highlight-face (:inherit match))
+                (show-paren-match (:background unspecified))))
        (new-faces (append faces (ag-themes--modify-modeline-faces '(:height 0.85)))))
   (color-theme-set-faces 'ag-themes-spacemacs-light
                          'spacemacs-light

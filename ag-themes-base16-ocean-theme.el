@@ -162,6 +162,7 @@
                                        :foreground (darker default :foreground 20)))
 
                 (lsp-lsp-flycheck-warning-unnecessary-face (:foreground "gray60" :background ,base01))
+                (lsp-face-highlight-textual (:background ,base02))
                 (cider-debug-code-overlay-face (:background "#f0ece1"))
                 (elfeed-search-title-face (:foreground ,base03))
                 (elfeed-search-unread-title-face (:foreground ,base04))

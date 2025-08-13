@@ -144,17 +144,23 @@ Examples:
                            faces-so-far)))
               (cond
                ((eq fn 'quote) face-prop)
-               ((not (fboundp fn)) face-prop) ; fn set, but uknown
-               ;; fn called for another face and propert
-               (arg3 (when-let ((other-props (ag-themes--merge-face-specs
-                                              arg1 base-faces faces-so-far))
-                                (prop-val (plist-get other-props arg2)))
+               ((not (fboundp fn)) face-prop) ; fn set, but unknown
+
+               ;; ignore inheriting multiple faces
+               ((and (eq prop-name :inherit)
+                     (listp prop-val))
+                face-prop)
+
+               ;; fn called for another face and property
+               (arg3 (when-let* ((other-props (ag-themes--merge-face-specs
+                                               arg1 base-faces faces-so-far))
+                                 (prop-val (plist-get other-props arg2)))
                        (list prop-name (format "%s" (funcall fn prop-val arg3)))))
                ;; fn called for the same face and property
-               (arg2 (when-let ((prop-val (plist-get prev-props arg2)))
+               (arg2 (when-let* ((prop-val (plist-get prev-props arg2)))
                        (list prop-name (format "%s" (funcall fn prop-val arg2)))))
                ;; fn called for the same property
-               (arg1 (when-let ((prop-val (plist-get prev-props prop-name)))
+               (arg1 (when-let* ((prop-val (plist-get prev-props prop-name)))
                        (list prop-name (format "%s" (funcall fn prop-val arg1)))))))))
 
          (resolve-face-props
@@ -197,39 +203,45 @@ Examples:
     (apply 'custom-theme-set-faces theme new-faces)))
 
 (defun color-theme-get-faces (theme)
-  "Get list of faces with their attributes of a given THEME.
-If theme is not loaded, it loads it first"
+  "Get list of faces with their attributes of a given THEME."
   (let* ((theme-settings (or (get theme 'theme-settings)
                              (progn
                                (load-theme theme :no-ask :no-enable)
                                (get theme 'theme-settings))))
          (extract-props (lambda (props)
                           "extracts face props based on display type"
-                          (seq-reduce
-                           (lambda (acc x)
-                             (pcase-let* ((`((,disp-type ,disp-val)) (if (listp (car x)) ; a guard for Emacs 27
-                                                                         (car x)         ; same shit works fine
-                                                                       (list ())))       ; without this bs in 28
-                                          (`(,face-props) (cdr x))
-                                          (face-props (cond
-                                                       ((and
-                                                         (listp face-props)
-                                                         (listp (car face-props))) (car face-props))
-                                                       ((listp face-props) face-props))))
+                          ;; Check if we have extra wrapping
+                          (let ((props (if (and (= (length props) 1)
+                                                (listp (car props))
+                                                (listp (caar props))
+                                                (not (eq (caar props) t)))  ; don't unwrap ((t ...))
+                                           (car props)  ; unwrap ef-themes style
+                                         props)))
+                            (seq-reduce
+                             (lambda (acc x)
                                (if acc acc
-                                 ;; prioritize graphic & color displays
-                                 (cond ((eq disp-val 'graphic) face-props)
-                                       ((eq disp-val 'color) face-props)
-                                       ((eq disp-type 'min-colors) face-props)
-                                       (t face-props)))))
-                           props nil))))
+                                 (cond
+                                  ;; ((t :inherit shadow))
+                                  ((and (listp x) (eq (car x) t))
+                                   (cdr x))
+                                  ;; (((conditions) :prop val ...)) - ef-themes style
+                                  ((and (listp x) (listp (car x)) (keywordp (cadr x)))
+                                   (cdr x))
+                                  ;; (((conditions) (:prop val ...))) - base16 style
+                                  ((and (listp x) (listp (car x)) (listp (cadr x)))
+                                   (cadr x))
+                                  (t nil))))
+                             props nil)))))
     (seq-remove
      'null
      (seq-map
       (lambda (x)
-        (pcase-let* ((`(,prop-type ,face _ . (,props)) x))
-          (when (eq prop-type 'theme-face)
-            (list face (funcall extract-props props)))))
+        (when (and (listp x)
+                   (eq (car x) 'theme-face))
+          (let ((face (cadr x))
+                (props-raw (cdddr x)))
+            (when props-raw
+              (list face (funcall extract-props props-raw))))))
       theme-settings))))
 
 (defun ag-themes--modify-modeline-faces (face-attrs)
@@ -302,9 +314,6 @@ If theme is not loaded, it loads it first"
 (when load-file-name
   (add-to-list 'custom-theme-load-path
                (file-name-as-directory (file-name-directory load-file-name))))
-
-;;;### (autoloads nil "ag-themes-base16-ocean-theme" "ag-themes-base16-ocean-theme.el"
-;;;;;;  (0 0 0 0))
 
 (provide 'ag-themes)
 ;;; ag-themes.el ends here

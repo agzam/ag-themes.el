@@ -60,7 +60,17 @@
                  (:background (darker default :background 3)
                   :foreground (darker default :background 20)
                   :height 1.3
-                  :inherit org-meta-line))))
+                  :inherit org-meta-line))
+
+                (org-drawer (:foreground (darker default :background 15)))
+
+                (org-special-keyword
+                 (:inherit (org-drawer fixed-pitch)
+                  :foreground (darker default :background 28)))
+
+                (org-property-value
+                 (:inherit (org-drawer fixed-pitch)
+                  :foreground (darker default :background 32)))))
        (new-faces (append faces (ag-themes--modify-modeline-faces '(:height 0.85)))))
   (color-theme-set-faces 'ag-themes-ef-elea-light
                          'ef-elea-light

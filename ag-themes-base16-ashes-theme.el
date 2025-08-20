@@ -19,7 +19,11 @@
 
 (deftheme ag-themes-base16-ashes "Customized theme based on base16-ashes.")
 
-(let* ((faces `((show-paren-match (:background unspecified))))
+(let* ((bg-accent "#3a4a4f")
+       (faces `((show-paren-match (:background unspecified))
+                (magit-diff-file-heading-highlight (:background ,bg-accent))
+
+                (vertico-current (:background ,bg-accent))))
        (new-faces (append faces (ag-themes--modify-modeline-faces '(:height 0.85)))))
   (color-theme-set-faces 'ag-themes-base16-ashes
                          'base16-ashes

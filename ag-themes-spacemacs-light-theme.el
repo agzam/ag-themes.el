@@ -49,6 +49,7 @@
                 (fringe (:background (darker default :background 2)))
                 (shadow (:foreground ,bg-accent-dark))
                 (magit-diff-hunk-heading (:background ,bg-darker))
+                (magit-diff-file-heading-highlight (:background ,bg-accent-light))
                 (magit-diff-hunk-heading-highlight (:background ,bg-accent-light))
                 (magit-diff-context-highlight (:background ,bg-darker))
                 (magit-diff-added (:foreground "#67963d" :background "#e6ffed"))
@@ -159,7 +160,9 @@
                 (elfeed-search-feed-face (:foreground "wheat3"))
 
                 (yas-field-highlight-face (:inherit match))
-                (show-paren-match (:background unspecified))))
+                (show-paren-match (:background unspecified))
+
+                (vertico-current (:background ,bg-accent))))
        (new-faces (append faces (ag-themes--modify-modeline-faces '(:height 0.85)))))
   (color-theme-set-faces 'ag-themes-spacemacs-light
                          'spacemacs-light

@@ -21,10 +21,13 @@
 (deftheme ag-themes-ef-elea-light "Customized theme based on ef-elea-light.")
 
 (let* ((faces `((default (:background (lighter 0)))
+
+                (region (:background (darker default :background 7)
+                         :inverse-video unspecified))
+
                 (tab-bar (:background (lighter default :background 3)))
                 (tab-bar-tab
-                 (:background (lighter default :background 20)
-                  :foreground (lighter default :foreground 0)
+                 (:background (lighter default :background 20) :foreground (lighter default :foreground 0)
                   :weight bold
                   :box unspecified))
                 (tab-bar-tab-inactive

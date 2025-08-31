@@ -73,7 +73,14 @@
 
                 (org-property-value
                  (:inherit (org-drawer fixed-pitch)
-                  :foreground (darker default :background 32)))))
+                  :foreground (darker default :background 32)))
+
+                (magit-diff-hunk-heading-highlight
+                 (:background unspecified))
+                (magit-section-highlight
+                 (:background unspecified))
+                (magit-diff-context-highlight
+                 (:background unspecified))))
        (new-faces (append faces (ag-themes--modify-modeline-faces '(:height 0.85)))))
   (color-theme-set-faces 'ag-themes-ef-elea-light
                          'ef-elea-light

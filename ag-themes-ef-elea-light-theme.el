@@ -80,7 +80,9 @@
                 (magit-section-highlight
                  (:background unspecified))
                 (magit-diff-context-highlight
-                 (:background unspecified))))
+                 (:background unspecified))
+
+                (help-key-binding (:background unspecified))))
        (new-faces (append faces (ag-themes--modify-modeline-faces '(:height 0.85)))))
   (color-theme-set-faces 'ag-themes-ef-elea-light
                          'ef-elea-light

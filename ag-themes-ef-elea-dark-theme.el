@@ -25,45 +25,46 @@
                 ;; (region (:background (darker default :background 7)
                 ;;          :inverse-video unspecified))
 
-                ;; (tab-bar (:background (lighter default :background 3)))
-                ;; (tab-bar-tab
-                ;;  (:background (lighter default :background 20) :foreground (lighter default :foreground 0)
-                ;;   :weight bold
-                ;;   :box unspecified))
-                ;; (tab-bar-tab-inactive
-                ;;  (:background (lighter default :background 3)
-                ;;   :foreground (darker default :foreground 20)
-                ;;   :box unspecified))
+                (tab-bar (:background unspecified))
+                (tab-bar-tab
+                 (:background unspecified
+                  :foreground (lighter default :foreground 0)
+                  :weight bold
+                  :box unspecified))
+                (tab-bar-tab-inactive
+                 (:background (lighter default :background 3)
+                  :foreground (darker default :foreground 20)
+                  :box unspecified))
 
-                ;; (org-block-begin-line
-                ;;  (:underline unspecified
-                ;;   :background (darker default :background 3)
-                ;;   :foreground (darker default :background 60)
-                ;;   :height 0.9
-                ;;   :weight ultra-light
-                ;;   :inherit fixed-pitch :extend t))
+                (org-block-begin-line
+                 (:underline unspecified
+                  :background (lighter default :background 3)
+                  :foreground (lighter default :background 60)
+                  :height 0.9
+                  :weight ultra-light
+                  :inherit fixed-pitch :extend t))
 
-                ;; (org-block (:background unspecified
-                ;;             :inherit fixed-pitch))
+                (org-block (:background unspecified
+                            :inherit fixed-pitch))
 
-                ;; (org-block-end-line
-                ;;  (:overline unspecified
-                ;;   :background (darker default :background 3)
-                ;;   :foreground (darker default :background 60)
-                ;;   :height 0.9
-                ;;   :weight ultra-light
-                ;;   :inherit fixed-pitch
-                ;;   :extend t))
+                (org-block-end-line
+                 (:overline unspecified
+                  :background (darker org-block-begin-line :background 0)
+                  :foreground (darker org-block-begin-line :foreground 0)
+                  :height 0.9
+                  :weight ultra-light
+                  :inherit fixed-pitch
+                  :extend t))
 
                 ;; (org-meta-line (:inherit fixed-pitch
                 ;;                 :height 0.9
                 ;;                 :weight ultra-light))
 
-                ;; (org-modern-indent-bracket-line
-                ;;  (:background (darker default :background 3)
-                ;;   :foreground (darker default :background 20)
-                ;;   :height 1.3
-                ;;   :inherit org-meta-line))
+                (org-modern-indent-bracket-line
+                 (:background (darker org-block-begin-line :background 3)
+                  :foreground (lighter default :background 20)
+                  :height 1.3
+                  :inherit org-meta-line))
 
                 ;; (org-drawer (:foreground (darker default :background 15)))
 
@@ -74,7 +75,35 @@
                 ;; (org-property-value
                 ;;  (:inherit (org-drawer fixed-pitch)
                 ;;   :foreground (darker default :background 32)))
-                ))
+
+                (dired-directory
+                 (:background unspecified))
+
+                (dired-subtree-depth-1-face
+                 (:background unspecified))
+                (dired-subtree-depth-2-face
+                 (:background unspecified))
+                (dired-subtree-depth-3-face
+                 (:background unspecified))
+                (dired-subtree-depth-4-face
+                 (:background unspecified))
+                (dired-subtree-depth-5-face
+                 (:background unspecified))
+                (dired-subtree-depth-6-face
+                 (:background unspecified))
+
+                (dired-symlink
+                 (:background unspecified))
+
+                (font-lock-comment-face
+                 (:background (darker default :background 5)
+                  :foreground (lighter default :background 25)))
+                (font-lock-comment-delimiter-face
+                 (:background (darker default :background 5)
+                  :foreground (lighter default :background 30)))
+
+                (font-lock-warning-face
+                 (:background unspecified))))
        (new-faces (append faces (ag-themes--modify-modeline-faces '(:height 0.85)))))
   (color-theme-set-faces 'ag-themes-ef-elea-dark
                          'ef-elea-dark

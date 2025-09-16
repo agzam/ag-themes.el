@@ -39,6 +39,7 @@
        (default-background base00)
        ;; (default-foreground base05)
        (faces `((default (:background (lighter 5)))
+                (button (:foregorund ,base0C))
                 (window-divider (:foreground (lighter default :background 0)))
                 (window-divider-first-pixel (:foreground (lighter default :background 0)))
                 (window-divider-last-pixel (:foreground (lighter default :background 0)))
@@ -70,7 +71,8 @@
                 (magit-diff-added-highlight (:foreground "#a3be70" :background nil))
                 (magit-section-highlight (:background "#2f343f"))
                 (magit-diff-hunk-heading (:background "#2f343f"))
-                (magit-diff-hunk-heading-highlight (:background "#2f363f"))
+                (magit-diff-file-heading-highlight (:background "#2f363f"))
+                (magit-diff-hunk-heading-highlight (:background "#2f363f" :foreground unspecified))
                 (diff-refine-added (:foreground "#a3be70" :background "#2b3b34"))
                 (diff-refine-removed (:foreground "#ef6160" :background "#3b2c2b"))
                 (smerge-refined-added (:foreground "#a3be70" :background "#2b3b34")) (smerge-refined-removed (:foreground "#ef6160" :background "#3b2c2b")) (forge-topic-closed (:strike-through t))
@@ -137,6 +139,7 @@
                 ;; code
                 (font-lock-doc-face (:foreground ,base02))
                 (font-lock-comment-face (:background nil))
+                (font-lock-comment-delimiter-face (:background unspecified))
                 (font-lock-warning-face (:background nil))
 
                 (term-color-blue (:foreground (lighter default :foreground 2)))
@@ -159,8 +162,10 @@
                               :foreground (lighter default :foreground 0)
                               :weight bold :box unspecified))
                 (tab-bar-tab-inactive (:background (lighter default :background 3)
-                                       :foreground (darker default :foreground 20)))
+                                       :foreground (darker default :foreground 20)
+                                       :box unspecified))
 
+                (transient-key (:inherit nil))
                 (lsp-lsp-flycheck-warning-unnecessary-face (:foreground "gray60" :background ,base01))
                 (lsp-face-highlight-textual (:background ,base02))
                 (cider-debug-code-overlay-face (:background "#f0ece1"))

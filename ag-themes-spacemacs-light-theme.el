@@ -161,7 +161,7 @@
 
                 (yas-field-highlight-face (:inherit match))
                 (show-paren-match (:background unspecified))
-
+                (error (:foreground "#fdb8c0"))
                 (vertico-current (:background ,bg-accent))))
        (new-faces (append faces (ag-themes--modify-modeline-faces '(:height 0.85)))))
   (color-theme-set-faces 'ag-themes-spacemacs-light

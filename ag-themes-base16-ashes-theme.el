@@ -20,8 +20,15 @@
 (deftheme ag-themes-base16-ashes "Customized theme based on base16-ashes.")
 
 (let* ((bg-accent "#3a4a4f")
-       (faces `((show-paren-match (:background unspecified))
+       (faces `((show-paren-match (:background unspecified :foreground "orange"))
                 (magit-diff-file-heading-highlight (:background ,bg-accent))
+                (tab-bar (:background (lighter default :background 0)))
+                (tab-bar-tab (:background (darker default :background 10)
+                              :foreground (darker default :foreground 20)
+                              :weight bold :box unspecified))
+                (tab-bar-tab-inactive (:background (lighter default :background 0)
+                                       :foreground (darker default :foreground 35)
+                                       :box unspecified))
 
                 (vertico-current (:background ,bg-accent))))
        (new-faces (append faces (ag-themes--modify-modeline-faces '(:height 0.85)))))

@@ -8,7 +8,7 @@
 ;; Version: 0.0.1
 ;; Keywords: faces
 ;; Homepage: https://github.com/agzam/ag-themes.el
-;; Package-Requires: ((emacs "27"))
+;; Package-Requires: ((emacs "29"))
 ;;
 ;; This file is not part of GNU Emacs.
 ;;
@@ -80,16 +80,22 @@ Sorted by color intensity (from lighter to darker)"
 (require 'color)
 
 (defun plist-merge (&rest plists)
-  "Merge two PLISTS."
-  (if plists
-      (let ((result (copy-sequence (car plists))))
-        (while (setq plists (cdr plists))
-          (let ((plist (car plists)))
-            (while plist
-              (setq result (plist-put result (car plist) (car (cdr plist)))
-                    plist (cdr (cdr plist))))))
-        result)
-    nil))
+  "Merge multiple PLISTS, handling both plists and lists containing plists."
+  (when plists
+    (let ((result (car plists)))
+      ;; Unwrap the first plist if needed
+      (when (and (listp result) (listp (car result)) (keywordp (caar result)))
+        (setq result (car result)))
+      (setq result (copy-sequence result))
+      
+      (dolist (plist (cdr plists))
+        ;; Unwrap if needed
+        (when (and (listp plist) (listp (car plist)) (keywordp (caar plist)))
+          (setq plist (car plist)))
+        (while plist
+          (setq result (plist-put result (car plist) (cadr plist))
+                plist (cddr plist))))
+      result)))
 
 (defun ag-themes--merge-face-specs (face &rest face-lists)
   "Merges properties from multiple FACE-LISTS into single FACE."

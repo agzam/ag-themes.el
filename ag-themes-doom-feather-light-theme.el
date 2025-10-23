@@ -20,7 +20,9 @@
 
 (deftheme ag-themes-doom-feather-light "Customized theme based on doom-feather-light.")
 
-(let* ((faces `((default (:background (lighter 0)))))
+(let* ((faces `((default (:background (lighter 0)))
+                (tab-bar-tab (:background (darker default :background 10)))
+                (tab-bar-tab-inactive (:foreground (lighter 15)))))
        (new-faces (append faces (ag-themes--modify-modeline-faces '(:height 0.85)))))
   (color-theme-set-faces 'ag-themes-doom-feather-light
                          'doom-feather-light

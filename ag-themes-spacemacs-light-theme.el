@@ -162,7 +162,9 @@
                 (yas-field-highlight-face (:inherit match))
                 (show-paren-match (:background unspecified))
                 (error (:foreground "#fdb8c0"))
-                (vertico-current (:background ,bg-accent))))
+                (vertico-current (:background ,bg-accent))
+
+                (ansi-color-faint (:foreground (lighter default :foreground 10)))))
        (new-faces (append faces (ag-themes--modify-modeline-faces '(:height 0.85)))))
   (color-theme-set-faces 'ag-themes-spacemacs-light
                          'spacemacs-light

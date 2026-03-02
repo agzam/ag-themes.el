@@ -130,8 +130,6 @@
                 (org-headline-done (:foreground ,base02))
                 (org-hide (:foreground ,default-background))
                 (org-indent (:inherit (fixed-pitch org-hide)))
-                (org-roam-link (:background ,base01 :foreground ,base0D))
-                (org-roam-link-invalid (:background "#45352e"))
                 (org-drawer (:foreground ,base02))
                 (org-special-keyword (:inherit (org-drawer fixed-pitch) :foreground ,base02))
                 (org-property-value (:inherit (org-drawer fixed-pitch) :foreground ,base02))

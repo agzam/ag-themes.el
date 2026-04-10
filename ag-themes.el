@@ -1,11 +1,11 @@
-;;; ag-themes.el --- Customized color themes -*- lexical-binding: t; -*-
+;;; ag-themes.el --- Customized color themes with face override DSL -*- lexical-binding: t; -*-
 ;;
-;; Copyright (C) 2021 Ag Ibragimomv
+;; Copyright (C) 2021 Ag Ibragimov
 ;;
-;; Author: Ag Ibragimomv <https://github.com/agzam/ag-themes.el>
-;; Maintainer: Ag Ibragimomv <agzam.ibragimov@gmail.com>
+;; Author: Ag Ibragimov <https://github.com/agzam/ag-themes.el>
+;; Maintainer: Ag Ibragimov <agzam.ibragimov@gmail.com>
 ;; Created: November 02, 2021
-;; Version: 0.0.1
+;; Version: 0.0.2
 ;; Keywords: faces
 ;; Homepage: https://github.com/agzam/ag-themes.el
 ;; Package-Requires: ((emacs "29"))
@@ -14,307 +14,327 @@
 ;;
 ;;; Commentary:
 ;;
-;;  Description
+;; Define derivative Emacs themes by overlaying face overrides on a base theme.
+;; Color transforms let you express relative changes rather than hardcoding hex
+;; values.
+;;
+;; Usage:
+;;
+;;   (ag-themes-deftheme ag-themes-my-theme
+;;     "My custom overrides."
+;;     :base doom-one
+;;     :modeline-height 0.85
+;;     :palette ((bg-alt . "#1e1e2e"))
+;;     :faces
+;;     (default :background bg-alt
+;;      mode-line :background (darker 10 default :foreground)
+;;      org-block :background (lighter 5)))
+;;
+;; Transform syntax - (FN AMOUNT [SOURCE-FACE] [SOURCE-PROP]):
+;;
+;;   (darker 10)                     - same face, same property
+;;   (lighter 10 :background)        - same face, use :background as source
+;;   (darker 30 default :foreground) - use default face's :foreground as source
 ;;
 ;;; Code:
 
-(defun color-get-face-colors (face)
-  "Return main FACE colors as a list of hex values."
+(require 'color)
+(require 'seq)
+
+;;; --- Transform dispatch ---
+
+(defconst ag-themes--transforms
+  '((darker     . color-darken-name)
+    (lighter    . color-lighten-name)
+    (saturate   . color-saturate-name)
+    (desaturate . color-desaturate-name))
+  "Map of DSL transform symbols to color manipulation functions.")
+
+;;; --- Utilities ---
+
+(defun ag-themes--plist-merge (&rest plists)
+  "Merge PLISTS left-to-right; later values win."
+  (let ((result (copy-sequence (or (car plists) '()))))
+    (dolist (plist (cdr plists))
+      (let ((p plist))
+        (while p
+          (setq result (plist-put result (car p) (cadr p))
+                p (cddr p)))))
+    result))
+
+(defun ag-themes--substitute-palette (form palette)
+  "Walk FORM replacing symbols found in PALETTE alist with their values.
+Palette symbols must not clash with transform names (darker, lighter,
+saturate, desaturate)."
+  (cond
+   ((and (symbolp form) (assq form palette))
+    (cdr (assq form palette)))
+   ((consp form)
+    (cons (ag-themes--substitute-palette (car form) palette)
+          (ag-themes--substitute-palette (cdr form) palette)))
+   (t form)))
+
+(defun ag-themes--parse-flat-faces (flat-list)
+  "Parse FLAT-LIST into alist of (FACE PLIST).
+Non-keyword symbols start new faces; keywords begin property pairs."
+  (let ((items flat-list)
+        result current-face current-props)
+    (while items
+      (let ((item (pop items)))
+        (cond
+         ((keywordp item)
+          (push item current-props)
+          (push (pop items) current-props))
+         ((symbolp item)
+          (when current-face
+            (push (list current-face (nreverse current-props)) result))
+          (setq current-face item
+                current-props nil)))))
+    (when current-face
+      (push (list current-face (nreverse current-props)) result))
+    (nreverse result)))
+
+;;; --- Base theme face extraction ---
+
+(defun ag-themes--extract-face-attrs (spec)
+  "Extract attribute plist from a theme face SPEC.
+Handles standard, ef-themes, and base16 wrapping conventions."
+  (when (consp spec)
+    (let ((chosen (ignore-errors (face-spec-choose spec))))
+      (cond
+       ;; Standard: (:prop val ...)
+       ((keywordp (car-safe chosen))
+        chosen)
+       ;; Wrapped: ((:prop val ...))
+       ((keywordp (car-safe (car-safe chosen)))
+        (car chosen))
+       ;; Fallback for formats face-spec-choose can't handle
+       (t
+        (let ((levels (if (and (consp (car-safe spec))
+                               (consp (car-safe (car-safe spec)))
+                               (not (eq (car-safe (car-safe spec)) t)))
+                          (list spec (car spec))
+                        (list spec))))
+          (seq-some
+           (lambda (level)
+             (when (consp level)
+               (seq-some
+                (lambda (item)
+                  (cond
+                   ((keywordp (car-safe item)) item)
+                   ((keywordp (car-safe (car-safe item))) (car item))))
+                level)))
+           levels)))))))
+
+(defun ag-themes--base-theme-faces (theme)
+  "Extract face attribute alist from THEME's registered settings."
+  (unless (memq theme custom-known-themes)
+    (load-theme theme :no-ask :no-enable))
+  (let (result)
+    (dolist (setting (get theme 'theme-settings))
+      (when (eq (car setting) 'theme-face)
+        (let* ((face (nth 1 setting))
+               (spec (nth 3 setting))
+               (attrs (ag-themes--extract-face-attrs spec)))
+          (when attrs
+            (push (list face attrs) result)))))
+    (nreverse result)))
+
+;;; --- Transform resolution ---
+
+(defun ag-themes--get-face-prop (face prop resolved)
+  "Look up PROP of FACE in the RESOLVED alist."
+  (when-let* ((entry (assq face resolved)))
+    (plist-get (cadr entry) prop)))
+
+(defun ag-themes--resolve-value (value prop face resolved)
+  "Resolve VALUE which may be a transform expression.
+PROP is the target property, FACE the target face, RESOLVED the
+accumulated face alist.  Returns the resolved value, or nil when
+a transform's source is missing."
+  (if (or (not (consp value)) (eq (car value) 'quote))
+      value
+    (if-let* ((fn (alist-get (car value) ag-themes--transforms)))
+        (pcase (cdr value)
+          ;; (FN AMOUNT) - same face, same property
+          (`(,(and amount (pred numberp)))
+           (if-let* ((src (ag-themes--get-face-prop face prop resolved)))
+               (funcall fn src amount)
+             (message "ag-themes: %s %s not found for %s" (car value) prop face)
+             nil))
+
+          ;; (FN AMOUNT :src-prop) - same face, different property
+          (`(,(and amount (pred numberp)) ,(and src-prop (pred keywordp)))
+           (if-let* ((src (ag-themes--get-face-prop face src-prop resolved)))
+               (funcall fn src amount)
+             (message "ag-themes: %s %s not found for %s" (car value) src-prop face)
+             nil))
+
+          ;; (FN AMOUNT src-face :src-prop) - different face and property
+          (`(,(and amount (pred numberp))
+             ,(and src-face (pred symbolp))
+             ,(and src-prop (pred keywordp)))
+           (if-let* ((src (ag-themes--get-face-prop src-face src-prop resolved)))
+               (funcall fn src amount)
+             (message "ag-themes: %s %s of %s not found"
+                      (car value) src-prop src-face)
+             nil))
+
+          ;; Args don't match any transform shape - return as literal
+          (_ value))
+      ;; Not a known transform symbol - return as literal
+      value)))
+
+(defun ag-themes--resolve-props (face props resolved)
+  "Resolve all property values in PROPS plist for FACE.
+Keeps nil values only when explicitly specified (not from failed transforms)."
+  (let ((items props) result)
+    (while items
+      (let* ((key (pop items))
+             (raw (pop items))
+             (val (ag-themes--resolve-value raw key face resolved)))
+        (when (or val (null raw))
+          (push key result)
+          (push val result))))
+    (nreverse result)))
+
+;;; --- Application ---
+
+(defun ag-themes--apply (theme base-theme flat-faces modeline-height)
+  "Build THEME by overlaying face overrides on BASE-THEME.
+FLAT-FACES is the flat property list of overrides.
+MODELINE-HEIGHT sets :height on modeline-related faces when non-nil."
+  (let* ((base-faces (ag-themes--base-theme-faces base-theme))
+         (overrides (ag-themes--parse-flat-faces flat-faces))
+         (overrides (if modeline-height
+                        (append overrides
+                                (ag-themes--modeline-faces modeline-height))
+                      overrides))
+         (all-specs (append base-faces overrides))
+         (resolved '()))
+    ;; Sequential reduce so earlier overrides are visible to later lookups
+    (dolist (entry all-specs)
+      (pcase-let* ((`(,face ,props) entry)
+                   (new-props (ag-themes--resolve-props face props resolved))
+                   (prev (cadr (assq face resolved)))
+                   (merged (if prev
+                               (ag-themes--plist-merge prev new-props)
+                             new-props)))
+        (setq resolved
+              (cons (list face merged)
+                    (seq-remove (lambda (x) (eq (car x) face))
+                                resolved)))))
+    (apply #'custom-theme-set-faces theme
+           (mapcar (lambda (entry)
+                     `(,(car entry) ((t ,@(cadr entry)))))
+                   resolved))))
+
+;;; --- Modeline faces ---
+
+(defun ag-themes--modeline-faces (height)
+  "Build override alist setting HEIGHT for modeline-related faces."
+  (let ((attrs (list :height height)))
+    (mapcar (lambda (f) (list f attrs))
+            '(mode-line-buffer-id mode-line-emphasis mode-line-highlight
+              persp-face-lighter-default persp-face-lighter-nil-persp
+              persp-face-lighter-buffer-not-in-persp
+              eyebrowse-mode-line-active eyebrowse-mode-line-inactive
+              eyebrowse-mode-line-separator eyebrowse-mode-line-delimiters
+              doom-modeline-buffer-timemachine
+              doom-modeline-battery-error doom-modeline-battery-critical
+              doom-modeline-battery-warning doom-modeline-battery-normal
+              doom-modeline-battery-full doom-modeline-battery-charging
+              doom-modeline-lsp-running doom-modeline-lsp-error
+              doom-modeline-lsp-warning doom-modeline-lsp-success
+              doom-modeline-repl-warning doom-modeline-repl-success
+              doom-modeline-persp-buffer-not-in-persp doom-modeline-persp-name
+              doom-modeline-evil-replace-state doom-modeline-evil-visual-state
+              doom-modeline-evil-operator-state doom-modeline-evil-normal-state
+              doom-modeline-evil-motion-state doom-modeline-evil-insert-state
+              doom-modeline-evil-emacs-state doom-modeline-debug-visual
+              doom-modeline-bar-inactive doom-modeline-bar
+              doom-modeline-unread-number doom-modeline-notification
+              doom-modeline-urgent doom-modeline-warning
+              doom-modeline-info doom-modeline-debug
+              doom-modeline-input-method-alt doom-modeline-input-method
+              doom-modeline-host doom-modeline-panel doom-modeline-highlight
+              doom-modeline-project-root-dir doom-modeline-project-dir
+              doom-modeline-project-parent-dir
+              doom-modeline-buffer-minor-mode doom-modeline-buffer-major-mode
+              doom-modeline-buffer-modified doom-modeline-buffer-file
+              doom-modeline-buffer-path
+              doom-modeline-vspc-face doom-modeline-spc-face))))
+
+;;; --- Diagnostic utilities ---
+
+(defun ag-themes-get-face-colors (face)
+  "Return FACE's foreground and background as a list of hex strings."
   (delete-dups
    (seq-remove
-    'null
+    #'null
     (seq-reduce
      (lambda (acc color)
        (if (eq 'unspecified color) acc
-         (let ((hex (apply 'color-rgb-to-hex
+         (let ((hex (apply #'color-rgb-to-hex
                            (append (color-name-to-rgb color) '(2)))))
            (append acc (list hex)))))
      (list (face-attribute face :foreground)
            (face-attribute face :background))
      '()))))
 
-(defun color-sort-colors (colors)
-  "Sort given list of COLORS from the lightest shade to the darkest."
-  (seq-map
-   (lambda (x) (car x))
-   (sort
-    (seq-map
-     (lambda (c)
-       (cons c (last (apply 'color-rgb-to-hsl (color-name-to-rgb c)))))
-     colors)
-    (lambda (x y)
-      (< (cadr y) (cadr x))))))
+(defun ag-themes-sort-colors (colors)
+  "Sort COLORS from lightest to darkest by HSL lightness."
+  (mapcar #'car
+          (sort (mapcar (lambda (c)
+                          (cons c (last (apply #'color-rgb-to-hsl
+                                              (color-name-to-rgb c)))))
+                        colors)
+                (lambda (x y) (< (cadr y) (cadr x))))))
 
-(defun color-get-theme-palette ()
-  "Return all the main colors used in the loaded theme.
-Sorted by color intensity (from lighter to darker)"
-  (color-sort-colors
-   (delete-dups
-    (seq-mapcat 'color-get-face-colors (face-list)))))
+(defun ag-themes-get-theme-palette ()
+  "Return all colors in the loaded theme, sorted light to dark."
+  (ag-themes-sort-colors
+   (delete-dups (seq-mapcat #'ag-themes-get-face-colors (face-list)))))
 
-(defun color-find-faces-of-color (color)
-  "Return all the faces of the loaded theme that are using COLOR."
-  (let* ((faces+colors (seq-mapcat
-                        (lambda (face)
-                          (when-let ((colors (color-get-face-colors face)))
-                            (list (list face colors))))
-                        (face-list)))
-         (filtered (seq-filter
-                    (lambda (face+colors)
-                      (pcase-let ((`(,face ,colors) face+colors))
-                        (when (seq-some
-                               (lambda (clr)
-                                 (pcase-let* ((conv (lambda (c)
-                                                      (seq-map
-                                                       (lambda (n)
-                                                         (string-to-number (format "%f" n)))
-                                                       (color-name-to-rgb c))))
-                                              (`(,r1 ,g1 ,b1) (funcall conv color))
-                                              (`(,r2 ,g2 ,b2) (funcall conv clr)))
-                                   (and (= r1 r2) (= g1 g2) (= b1 b2))))
-                               colors)
-                          face)))
-                    faces+colors)))
-    (seq-map 'car filtered)))
-
-(require 'color)
-
-(defun plist-merge (&rest plists)
-  "Merge multiple PLISTS, handling both plists and lists containing plists."
-  (when plists
-    (let ((result (car plists)))
-      ;; Unwrap the first plist if needed
-      (when (and (listp result) (listp (car result)) (keywordp (caar result)))
-        (setq result (car result)))
-      (setq result (copy-sequence result))
-      
-      (dolist (plist (cdr plists))
-        ;; Unwrap if needed
-        (when (and (listp plist) (listp (car plist)) (keywordp (caar plist)))
-          (setq plist (car plist)))
-        (while plist
-          (setq result (plist-put result (car plist) (cadr plist))
-                plist (cddr plist))))
-      result)))
-
-(defun ag-themes--merge-face-specs (face &rest face-lists)
-  "Merges properties from multiple FACE-LISTS into single FACE."
-  (apply
-   'plist-merge
-   (seq-map
-    'cadr
+(defun ag-themes-find-faces-of-color (color)
+  "Find all faces in the loaded theme that use COLOR."
+  (let ((target-rgb (mapcar (lambda (n) (string-to-number (format "%f" n)))
+                            (color-name-to-rgb color))))
     (seq-filter
-     (lambda (x) (eq (car x) face))
-     (apply 'append face-lists)))))
+     (lambda (face)
+       (when-let* ((colors (ag-themes-get-face-colors face)))
+         (seq-some
+          (lambda (clr)
+            (equal target-rgb
+                   (mapcar (lambda (n) (string-to-number (format "%f" n)))
+                           (color-name-to-rgb clr))))
+          colors)))
+     (face-list))))
 
-(defun color-theme-set-faces (theme base-theme faces-alist)
-  "Modified version of `custom-theme-set-faces'.
+;;; --- Theme definition macro ---
 
-Allows relative (darker, lighter, etc.) changes to existing faces
-in the BASE-THEME. FACES-ALIST is a list of modified faces and
-their properties. Applied modifications get reflected in a new
-THEME.
+;;;###autoload
+(defmacro ag-themes-deftheme (name docstring &rest plist)
+  "Define theme NAME with DOCSTRING as face overrides on a base theme.
 
-Examples:
-\\(color-theme-set-faces \\'new-zenburn \\'zenburn
-  \\`(
-    ;; set foreground to green and use background color of the
-    ;; same face (default of zenburn theme) but make it darker by 10%
-    (default (:foreground \"green\" :background (darker 10)))
-
-    ;; take foreground color of mode-line face
-    ;; and use it for :backround, but make it 20% lighter
-    (mode-line (:background (lighter :foreground 20)))))
-
-    ;; use background color of org-level-1 face,
-    ;; make it a bit darker and use that for org-level-2 foreground
-    (org-level-2 (:foreground (darker org-level-1 :background 15)))
-
-    ;; desaturate org-level-3 face background by 10%
-    (org-level-3 (:background (color-desaturate-name 10)))))"
-
-  (fset 'darker 'color-darken-name)
-  (fset 'lighter 'color-lighten-name)
-  (fset 'desaturate 'color-desaturate-name)
-  (fset 'saturate 'color-saturate-name)
-  (let* ((base-faces (color-theme-get-faces base-theme))
-
-         (resolve-face-prop
-          (lambda (face face-prop faces-so-far)
-            (pcase-let* ((`(,prop-name ,prop-val) face-prop)
-                         (`(,fn ,arg1 ,arg2 ,arg3) (when (listp prop-val) prop-val))
-                         (prev-props
-                          (ag-themes--merge-face-specs
-                           face
-                           base-faces
-                           faces-so-far)))
-              (cond
-               ((eq fn 'quote) face-prop)
-               ((not (fboundp fn)) face-prop) ; fn set, but unknown
-
-               ;; ignore inheriting multiple faces
-               ((and (eq prop-name :inherit)
-                     (listp prop-val))
-                face-prop)
-
-               ;; fn called for another face and property
-               (arg3 (when-let* ((other-props (ag-themes--merge-face-specs
-                                               arg1 base-faces faces-so-far))
-                                 (prop-val (plist-get other-props arg2)))
-                       (list prop-name (format "%s" (funcall fn prop-val arg3)))))
-               ;; fn called for the same face and property
-               (arg2 (when-let* ((prop-val (plist-get prev-props arg2)))
-                       (list prop-name (format "%s" (funcall fn prop-val arg2)))))
-               ;; fn called for the same property
-               (arg1 (when-let* ((prop-val (plist-get prev-props prop-name)))
-                       (list prop-name (format "%s" (funcall fn prop-val arg1)))))))))
-
-         (resolve-face-props
-          (lambda (face face-props faces-so-far)
-            (seq-mapcat
-             (lambda (prop)
-               (funcall resolve-face-prop
-                        face prop faces-so-far))
-             (seq-partition face-props 2))))
-
-         (reducer
-          (lambda (acc face-spec)
-            (pcase-let*
-                ((`(,face ,face-props) face-spec)
-                 (prev-props
-                  (seq-map 'cadr
-                           (seq-filter
-                            (lambda (x) (eq (car x) face))
-                            (append base-faces acc))))
-
-                 (new-props
-                  (apply 'plist-merge
-                         (append
-                          prev-props
-                          (list (funcall resolve-face-props
-                                         face
-                                         face-props
-                                         acc)))))
-                 ;; overwrite any previous face definition
-                 (acc (seq-remove (lambda (x) (eq (car x) face)) acc))
-                 (new-el `(,face ,new-props)))
-              (push new-el acc))))
-         (faces (seq-reduce reducer (append
-                                     base-faces
-                                     faces-alist) '()))
-         (new-faces (seq-map
-                     (lambda (x)
-                       `(,(car x) ((t ,@(cdr x)))))
-                     faces)))
-    (apply 'custom-theme-set-faces theme new-faces)))
-
-(defun color-theme-get-faces (theme)
-  "Get list of faces with their attributes of a given THEME."
-  (let* ((theme-settings (or (get theme 'theme-settings)
-                             (progn
-                               (load-theme theme :no-ask :no-enable)
-                               (get theme 'theme-settings))))
-         (extract-props (lambda (props)
-                          "extracts face props based on display type"
-                          ;; Check if we have extra wrapping
-                          (let ((props (if (and (= (length props) 1)
-                                                (listp (car props))
-                                                (listp (caar props))
-                                                (not (eq (caar props) t)))  ; don't unwrap ((t ...))
-                                           (car props)  ; unwrap ef-themes style
-                                         props)))
-                            (seq-reduce
-                             (lambda (acc x)
-                               (if acc acc
-                                 (cond
-                                  ;; ((t :inherit shadow))
-                                  ((and (listp x) (eq (car x) t))
-                                   (cdr x))
-                                  ;; (((conditions) :prop val ...)) - ef-themes style
-                                  ((and (listp x) (listp (car x)) (keywordp (cadr x)))
-                                   (cdr x))
-                                  ;; (((conditions) (:prop val ...))) - base16 style
-                                  ((and (listp x) (listp (car x)) (listp (cadr x)))
-                                   (cadr x))
-                                  (t nil))))
-                             props nil)))))
-    (seq-remove
-     'null
-     (seq-map
-      (lambda (x)
-        (when (and (listp x)
-                   (eq (car x) 'theme-face))
-          (let ((face (cadr x))
-                (props-raw (cdddr x)))
-            (when props-raw
-              (list face (funcall extract-props props-raw))))))
-      theme-settings))))
-
-(defun ag-themes--modify-modeline-faces (face-attrs)
-  "Set modeline faces with `FACE-ATTRS'."
-  (let ((faces '(
-                 ;; mode-line
-                 mode-line-buffer-id
-                 mode-line-emphasis
-                 mode-line-highlight
-                 ;; mode-line-inactive
-
-                 persp-face-lighter-default
-                 persp-face-lighter-nil-persp
-                 persp-face-lighter-buffer-not-in-persp
-
-                 eyebrowse-mode-line-active
-                 eyebrowse-mode-line-inactive
-                 eyebrowse-mode-line-separator
-                 eyebrowse-mode-line-delimiters
-
-                 doom-modeline-buffer-timemachine
-                 doom-modeline-battery-error
-                 doom-modeline-battery-critical
-                 doom-modeline-battery-warning
-                 doom-modeline-battery-normal
-                 doom-modeline-battery-full
-                 doom-modeline-battery-charging
-                 doom-modeline-lsp-running
-                 doom-modeline-lsp-error
-                 doom-modeline-lsp-warning
-                 doom-modeline-lsp-success
-                 doom-modeline-repl-warning
-                 doom-modeline-repl-success
-                 doom-modeline-persp-buffer-not-in-persp
-                 doom-modeline-persp-name
-                 doom-modeline-evil-replace-state
-                 doom-modeline-evil-visual-state
-                 doom-modeline-evil-operator-state
-                 doom-modeline-evil-normal-state
-                 doom-modeline-evil-motion-state
-                 doom-modeline-evil-insert-state
-                 doom-modeline-evil-emacs-state
-                 doom-modeline-debug-visual
-                 doom-modeline-bar-inactive
-                 doom-modeline-bar
-                 doom-modeline-unread-number
-                 doom-modeline-notification
-                 doom-modeline-urgent
-                 doom-modeline-warning
-                 doom-modeline-info
-                 doom-modeline-debug
-                 doom-modeline-input-method-alt
-                 doom-modeline-input-method
-                 doom-modeline-host
-                 doom-modeline-panel
-                 doom-modeline-highlight
-                 doom-modeline-project-root-dir
-                 doom-modeline-project-dir
-                 doom-modeline-project-parent-dir
-                 doom-modeline-buffer-minor-mode
-                 doom-modeline-buffer-major-mode
-                 doom-modeline-buffer-modified
-                 doom-modeline-buffer-file
-                 doom-modeline-buffer-path
-                 doom-modeline-vspc-face
-                 doom-modeline-spc-face)))
-    (seq-map (lambda (x) `(,x ,face-attrs)) faces)))
+PLIST keywords:
+  :base            Base theme symbol to override (required).
+  :palette         Alist of (SYMBOL . VALUE) for substitution in :faces.
+  :modeline-height Number for :height on modeline-related faces.
+  :faces           Flat face specs: FACE :prop val :prop val FACE ..."
+  (declare (indent 1))
+  (let* ((base (plist-get plist :base))
+         (palette (plist-get plist :palette))
+         (modeline-height (plist-get plist :modeline-height))
+         (raw-faces (plist-get plist :faces))
+         (faces (if palette
+                    (ag-themes--substitute-palette raw-faces palette)
+                  raw-faces)))
+    `(progn
+       (deftheme ,name ,docstring)
+       (ag-themes--apply ',name ',base ',faces ,modeline-height)
+       (provide-theme ',name)
+       (provide ',(intern (concat (symbol-name name) "-theme"))))))
 
 ;;;###autoload
 (when load-file-name

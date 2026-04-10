@@ -1,4 +1,4 @@
-;;;  ag-themes-doom-feather-light-theme.el --- Customized theme based on doom-feather-light -*- lexical-binding: t; -*-
+;;; ag-themes-doom-feather-light-theme.el --- Customized theme based on doom-feather-light -*- lexical-binding: t; -*-
 ;;
 ;; Author: Ag Ibragimov
 ;; URL: https://github.com/agzam/ag-themes.el
@@ -10,25 +10,20 @@
 ;;
 ;;; Commentary:
 ;;
-;;  Description
-;; Customized theme based on doom-feather-light
+;; Customized theme based on doom-feather-light.
+;;
 ;;; Code:
 
 (require 'ag-themes)
 (require 'doom-themes)
-(require 'doom-feather-light-theme)
 
-(deftheme ag-themes-doom-feather-light "Customized theme based on doom-feather-light.")
+(ag-themes-deftheme ag-themes-doom-feather-light
+  "Customized theme based on doom-feather-light."
+  :base doom-feather-light
+  :modeline-height 0.85
+  :faces
+  (default :background (lighter 0)
+   tab-bar-tab :background (darker 10 default :background)
+   tab-bar-tab-inactive :foreground (lighter 15)))
 
-(let* ((faces `((default (:background (lighter 0)))
-                (tab-bar-tab (:background (darker default :background 10)))
-                (tab-bar-tab-inactive (:foreground (lighter 15)))))
-       (new-faces (append faces (ag-themes--modify-modeline-faces '(:height 0.85)))))
-  (color-theme-set-faces 'ag-themes-doom-feather-light
-                         'doom-feather-light
-                         new-faces))
-
-(provide-theme 'ag-themes-doom-feather-light)
-
-(provide 'ag-themes-doom-feather-light-theme)
 ;;; ag-themes-doom-feather-light-theme.el ends here

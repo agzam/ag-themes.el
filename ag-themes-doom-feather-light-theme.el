@@ -22,7 +22,7 @@
   :base doom-feather-light
   :modeline-height 0.85
   :faces
-  (default :background (lighter 0)
+  (default :background (darker 3)
    tab-bar-tab :background (darker 10 default :background)
    tab-bar-tab-inactive :foreground (lighter 15)))
 

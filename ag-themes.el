@@ -38,6 +38,7 @@
 ;;
 ;;; Code:
 
+(require 'cl-lib)
 (require 'color)
 (require 'seq)
 
@@ -126,6 +127,23 @@ Handles standard, ef-themes, and base16 wrapping conventions."
                 level)))
            levels)))))))
 
+(defun ag-themes--strip-self-cycle-inherit (attrs face all-faces)
+  "Drop :inherit from ATTRS when FACE = X-empty inherits sibling X in ALL-FACES.
+Emacs 31 strictly errors on face inheritance cycles; some upstreams (e.g. gnus)
+defface X with :inherit X-empty, while base16-derived themes set X-empty with
+:inherit X.  The combined state forms a cycle that aborts new-frame face-spec
+recalc.  Removing the theme's back-inherit breaks it."
+  (if-let* ((parent (plist-get attrs :inherit))
+            ((symbolp parent))
+            (name (symbol-name face))
+            ((string-suffix-p "-empty" name))
+            (sibling (intern (substring name 0 -6)))
+            ((eq parent sibling))
+            ((memq sibling all-faces)))
+      (cl-loop for (k v) on attrs by #'cddr
+               unless (eq k :inherit) nconc (list k v))
+    attrs))
+
 (defun ag-themes--base-theme-faces (theme)
   "Extract face attribute alist from THEME's registered settings."
   (unless (memq theme custom-known-themes)
@@ -138,7 +156,12 @@ Handles standard, ef-themes, and base16 wrapping conventions."
                (attrs (ag-themes--extract-face-attrs spec)))
           (when attrs
             (push (list face attrs) result)))))
-    (nreverse result)))
+    (setq result (nreverse result))
+    (let ((faces (mapcar #'car result)))
+      (mapcar (pcase-lambda (`(,face ,attrs))
+                (list face (ag-themes--strip-self-cycle-inherit
+                            attrs face faces)))
+              result))))
 
 ;;; --- Transform resolution ---
 

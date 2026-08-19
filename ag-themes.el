@@ -208,9 +208,16 @@ a transform's source is missing."
       ;; Not a known transform symbol - return as literal
       value)))
 
+(defconst ag-themes--nil-invalid-attributes
+  '(:family :foundry :width :height :weight :slant :foreground :background)
+  "Face attributes nil cannot unset.
+Emacs takes `unspecified' for these; nil leaves the attribute untouched,
+and warns for :foreground and :background.")
+
 (defun ag-themes--resolve-props (face props resolved)
   "Resolve all property values in PROPS plist for FACE.
-Keeps nil values only when explicitly specified (not from failed transforms)."
+Keeps nil values only when explicitly specified (not from failed transforms),
+rewritten to `unspecified' where nil would not unset the attribute."
   (let ((items props) result)
     (while items
       (let* ((key (pop items))
@@ -218,7 +225,11 @@ Keeps nil values only when explicitly specified (not from failed transforms)."
              (val (ag-themes--resolve-value raw key face resolved)))
         (when (or val (null raw))
           (push key result)
-          (push val result))))
+          (push (if (and (null val)
+                         (memq key ag-themes--nil-invalid-attributes))
+                    'unspecified
+                  val)
+                result))))
     (nreverse result)))
 
 ;;; --- Application ---

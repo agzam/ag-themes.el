@@ -36,6 +36,12 @@
 ;;   (lighter 10 :background)        - same face, use :background as source
 ;;   (darker 30 default :foreground) - use default face's :foreground as source
 ;;
+;; Blend mixes a literal color into the source instead of shifting it, so a
+;; theme can tint its own background - (blend AMOUNT COLOR [FACE] [PROP]):
+;;
+;;   (blend 70 "#e6ffed")                     - 70% the literal, 30% the source
+;;   (blend 30 "#3fb950" default :background) - tint the default background
+;;
 ;;; Code:
 
 (require 'cl-lib)
@@ -49,7 +55,18 @@
     (lighter    . color-lighten-name)
     (saturate   . color-saturate-name)
     (desaturate . color-desaturate-name))
-  "Map of DSL transform symbols to color manipulation functions.")
+  "Map of DSL transform symbols to color manipulation functions.
+`blend' takes a second color instead of shifting one, so it resolves
+separately in `ag-themes--transform-spec'.")
+
+(defun ag-themes--blend-colors (color source amount)
+  "Mix AMOUNT percent of COLOR into SOURCE."
+  (let ((weight (/ amount 100.0)))
+    (apply #'color-rgb-to-hex
+           (append (cl-mapcar (lambda (a b) (+ (* weight a) (* (- 1 weight) b)))
+                              (color-name-to-rgb color)
+                              (color-name-to-rgb source))
+                   '(2)))))
 
 ;;; --- Utilities ---
 
@@ -66,7 +83,7 @@
 (defun ag-themes--substitute-palette (form palette)
   "Walk FORM replacing symbols found in PALETTE alist with their values.
 Palette symbols must not clash with transform names (darker, lighter,
-saturate, desaturate)."
+saturate, desaturate, blend)."
   (cond
    ((and (symbolp form) (assq form palette))
     (cdr (assq form palette)))
@@ -170,6 +187,37 @@ recalc.  Removing the theme's back-inherit breaks it."
   (when-let* ((entry (assq face resolved)))
     (plist-get (cadr entry) prop)))
 
+(defun ag-themes--transform-source (tail face prop)
+  "Return (SRC-FACE SRC-PROP) naming the color a transform reads.
+TAIL is the argument tail after the transform's own arguments: empty for
+FACE's own PROP, (:prop) for another property of FACE, or (face :prop)
+for another face's property.  SRC-PROP is nil when TAIL has no valid
+shape."
+  (pcase tail
+    ('() (list face prop))
+    (`(,(and src-prop (pred keywordp))) (list face src-prop))
+    (`(,(and src-face (pred symbolp)) ,(and src-prop (pred keywordp)))
+     (list src-face src-prop))
+    (_ (list nil nil))))
+
+(defun ag-themes--transform-spec (value face prop)
+  "Destructure transform VALUE into (SRC-FACE SRC-PROP BUILDER).
+BUILDER makes the final color from the source color.  FACE and PROP
+supply the source parts VALUE leaves unnamed.  Returns nil when VALUE is
+not a transform expression."
+  (pcase value
+    (`(blend ,(and amount (pred numberp)) ,(and color (pred stringp)) . ,tail)
+     (pcase-let ((`(,src-face ,src-prop) (ag-themes--transform-source tail face prop)))
+       (when src-prop
+         (list src-face src-prop
+               (lambda (src) (ag-themes--blend-colors color src amount))))))
+    (`(,(and sym (pred symbolp)) ,(and amount (pred numberp)) . ,tail)
+     (when-let* ((fn (alist-get sym ag-themes--transforms))
+                 (source (ag-themes--transform-source tail face prop))
+                 (src-prop (cadr source)))
+       (list (car source) src-prop
+             (lambda (src) (funcall fn src amount)))))))
+
 (defun ag-themes--resolve-value (value prop face resolved)
   "Resolve VALUE which may be a transform expression.
 PROP is the target property, FACE the target face, RESOLVED the
@@ -177,35 +225,14 @@ accumulated face alist.  Returns the resolved value, or nil when
 a transform's source is missing."
   (if (or (not (consp value)) (eq (car value) 'quote))
       value
-    (if-let* ((fn (alist-get (car value) ag-themes--transforms)))
-        (pcase (cdr value)
-          ;; (FN AMOUNT) - same face, same property
-          (`(,(and amount (pred numberp)))
-           (if-let* ((src (ag-themes--get-face-prop face prop resolved)))
-               (funcall fn src amount)
-             (message "ag-themes: %s %s not found for %s" (car value) prop face)
-             nil))
-
-          ;; (FN AMOUNT :src-prop) - same face, different property
-          (`(,(and amount (pred numberp)) ,(and src-prop (pred keywordp)))
-           (if-let* ((src (ag-themes--get-face-prop face src-prop resolved)))
-               (funcall fn src amount)
-             (message "ag-themes: %s %s not found for %s" (car value) src-prop face)
-             nil))
-
-          ;; (FN AMOUNT src-face :src-prop) - different face and property
-          (`(,(and amount (pred numberp))
-             ,(and src-face (pred symbolp))
-             ,(and src-prop (pred keywordp)))
-           (if-let* ((src (ag-themes--get-face-prop src-face src-prop resolved)))
-               (funcall fn src amount)
-             (message "ag-themes: %s %s of %s not found"
-                      (car value) src-prop src-face)
-             nil))
-
-          ;; Args don't match any transform shape - return as literal
-          (_ value))
-      ;; Not a known transform symbol - return as literal
+    (if-let* ((spec (ag-themes--transform-spec value face prop)))
+        (pcase-let ((`(,src-face ,src-prop ,builder) spec))
+          (if-let* ((src (ag-themes--get-face-prop src-face src-prop resolved)))
+              (funcall builder src)
+            (message "ag-themes: %s %s of %s not found"
+                     (car value) src-prop src-face)
+            nil))
+      ;; Not a transform expression - return as literal
       value)))
 
 (defconst ag-themes--nil-invalid-attributes
@@ -355,7 +382,12 @@ PLIST keywords:
   :base            Base theme symbol to override (required).
   :palette         Alist of (SYMBOL . VALUE) for substitution in :faces.
   :modeline-height Number for :height on modeline-related faces.
-  :faces           Flat face specs: FACE :prop val :prop val FACE ..."
+  :faces           Flat face specs: FACE :prop val :prop val FACE ...
+
+Values in :faces may be transform expressions: (darker AMOUNT ...) and
+its siblings shift a source color, (blend AMOUNT COLOR ...) mixes COLOR
+into it.  Both read the source from the face and property being set
+unless the expression names another."
   (declare (indent 1))
   (let* ((base (plist-get plist :base))
          (palette (plist-get plist :palette))

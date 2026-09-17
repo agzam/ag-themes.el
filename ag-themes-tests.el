@@ -51,6 +51,63 @@
                     'default '(:background (darker 100)) resolved)
                    '(:background "#000000000000")))))
 
+;;; --- Blend transform ---
+
+;; Batch Emacs has no display, so `color-name-to-rgb' quantises every input to
+;; one bit per channel.  Colours here stay on the black/white/primary corners
+;; that survive it; a subtler literal would read back as a different colour.
+
+(ert-deftest ag-themes-blend-reads-the-source-each-shape-names ()
+  "Every blend shape mixes its colour into the source it selects."
+  (let ((resolved '((default (:background "#000000" :foreground "#000000"))
+                    (other (:background "#000000")))))
+    ;; (blend AMOUNT COLOR) - same face, same property
+    (should (equal (ag-themes--resolve-value
+                    '(blend 50 "#ffffff") :background 'default resolved)
+                   "#7f7f7f"))
+    ;; (blend AMOUNT COLOR :src-prop) - same face, another property
+    (should (equal (ag-themes--resolve-value
+                    '(blend 50 "#ffffff" :foreground) :background 'default resolved)
+                   "#7f7f7f"))
+    ;; (blend AMOUNT COLOR src-face :src-prop) - another face's property
+    (should (equal (ag-themes--resolve-value
+                    '(blend 25 "#ff0000" other :background) :background 'target resolved)
+                   "#3f0000"))))
+
+(ert-deftest ag-themes-blend-spans-source-to-color ()
+  "A zero amount keeps the source and a full amount reaches the colour."
+  (let ((resolved '((default (:background "#ff0000")))))
+    (should (equal (ag-themes--resolve-value
+                    '(blend 0 "#00ff00" default :background) :background 'x resolved)
+                   "#ff0000"))
+    (should (equal (ag-themes--resolve-value
+                    '(blend 100 "#00ff00" default :background) :background 'x resolved)
+                   "#00ff00"))))
+
+(ert-deftest ag-themes-resolve-props-drops-failed-blend ()
+  "A blend with no source drops its pair, as the shifting transforms do."
+  (should (equal (ag-themes--resolve-props
+                  'orphan '(:background (blend 50 "#ff0000")) nil)
+                 nil)))
+
+(ert-deftest ag-themes-unary-transform-rejects-a-color-argument ()
+  "A shifting transform handed a color survives as a literal.
+Its color function takes no second color, so the expression must not
+reach one."
+  (let ((resolved '((default (:background "#ffffff")))))
+    (should (equal (ag-themes--resolve-value
+                    '(darker 10 "#fff") :background 'default resolved)
+                   '(darker 10 "#fff")))))
+
+(ert-deftest ag-themes-resolve-value-passes-non-transform-lists-through ()
+  "Lists that only look like transforms stay literal."
+  (should (equal (ag-themes--resolve-value
+                  '(variable-pitch org-block) :inherit 'org-verse nil)
+                 '(variable-pitch org-block)))
+  (should (equal (ag-themes--resolve-value
+                  '(:color "#dedae0") :box 'mode-line nil)
+                 '(:color "#dedae0"))))
+
 ;;; --- Theme application ---
 
 (ert-deftest ag-themes-apply-emits-no-nil-colors ()

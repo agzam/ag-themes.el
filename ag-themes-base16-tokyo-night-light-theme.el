@@ -21,7 +21,19 @@
   :base base16-tokyo-night-light
   :modeline-height 0.85
   :palette ((base01 . "#cbccd1")
-            (base04 . "#4c505e"))
+            (base04 . "#4c505e")
+            (diff-add-bg . "#e6ffed")
+            (diff-add-word . "#acf2bd")
+            (diff-add-fg . "#1a7f37")
+            (diff-add-fg-hl . "#116329")
+            (diff-del-bg . "#ffeef0")
+            (diff-del-word . "#fdb8c0")
+            (diff-del-fg . "#cf222e")
+            (diff-del-fg-hl . "#a40e26")
+            (diff-chg-bg . "#fff8c5")
+            (diff-chg-word . "#ffe57f")
+            (diff-chg-fg . "#9a6700")
+            (diff-chg-fg-hl . "#7d4e00"))
   :faces
   (default :background (lighter 0)
    show-paren-match :background unspecified
@@ -41,6 +53,90 @@
    org-modern-indent-bracket-line :background base01 :height 1.3
                                   :inherit org-meta-line
    lsp-face-highlight-textual :background base04
-   vertico-current :background base01))
+   vertico-current :background base01
+
+   ;; The base theme leaves the Magit diff faces unset, so Emacs' own saturated
+   ;; defaults show through.  GitHub's light tints, mixed into this theme's own
+   ;; background so they keep its cast.
+   magit-diff-added :foreground diff-add-fg
+                    :background (blend 70 diff-add-bg default :background)
+   magit-diff-added-highlight :foreground diff-add-fg-hl
+                              :background (blend 70 diff-add-bg default :background)
+   magit-diff-removed :foreground diff-del-fg
+                      :background (blend 70 diff-del-bg default :background)
+   magit-diff-removed-highlight :foreground diff-del-fg-hl
+                                :background (blend 70 diff-del-bg default :background)
+   magit-diff-context-highlight :background (darker 3 default :background)
+   magit-section-highlight :background (darker 3 default :background)
+   magit-diff-hunk-heading :background (darker 5 default :background)
+                           :foreground unspecified
+   magit-diff-hunk-heading-highlight :background (darker 9 default :background)
+                                     :foreground unspecified
+   magit-diff-file-heading-highlight :background (darker 9 default :background)
+                                     :foreground unspecified
+
+   diff-header :background (darker 5 default :background)
+   diff-file-header :background (darker 5 default :background)
+   diff-hunk-header :background (darker 5 default :background)
+   diff-added :foreground diff-add-fg-hl
+              :background (blend 70 diff-add-bg default :background)
+   diff-removed :foreground diff-del-fg-hl
+                :background (blend 70 diff-del-bg default :background)
+   diff-indicator-added :foreground diff-add-fg-hl :background unspecified
+   diff-indicator-removed :foreground diff-del-fg-hl :background unspecified
+   diff-refine-added :foreground diff-add-fg-hl
+                     :background (blend 70 diff-add-word default :background)
+   diff-refine-removed :foreground diff-del-fg-hl
+                       :background (blend 70 diff-del-word default :background)
+
+   smerge-upper :background (blend 70 diff-del-bg default :background)
+   smerge-lower :background (blend 70 diff-add-bg default :background)
+   smerge-refined-added :foreground diff-add-fg-hl
+                        :background (blend 70 diff-add-word default :background)
+   smerge-refined-removed :foreground diff-del-fg-hl
+                          :background (blend 70 diff-del-word default :background)
+
+   ediff-current-diff-A :foreground diff-del-fg-hl
+                        :background (blend 70 diff-del-bg default :background)
+   ediff-fine-diff-A :foreground diff-del-fg-hl
+                     :background (blend 70 diff-del-word default :background)
+   ediff-current-diff-B :foreground diff-add-fg-hl
+                        :background (blend 70 diff-add-bg default :background)
+   ediff-fine-diff-B :foreground diff-add-fg-hl
+                     :background (blend 70 diff-add-word default :background)
+
+   ;; Conflict and whitespace faces default to saturated slabs; amber carries
+   ;; the base side, as it does on GitHub.
+   magit-diff-base :foreground diff-chg-fg
+                   :background (blend 70 diff-chg-bg default :background)
+   magit-diff-base-highlight :foreground diff-chg-fg-hl
+                             :background (blend 70 diff-chg-bg default :background)
+   magit-diff-our-heading :background (blend 70 diff-del-bg default :background)
+                          :foreground unspecified
+   magit-diff-their-heading :background (blend 70 diff-add-bg default :background)
+                            :foreground unspecified
+   magit-diff-base-heading :background (blend 70 diff-chg-bg default :background)
+                           :foreground unspecified
+   magit-diff-conflict-heading :background (darker 5 default :background)
+                               :foreground unspecified
+   magit-diff-whitespace-warning :background (blend 70 diff-del-word default :background)
+                                 :foreground unspecified
+   magit-diff-lines-heading :background (blend 70 diff-del-word default :background)
+                            :foreground unspecified
+   magit-diff-lines-boundary :background (blend 70 diff-del-word default :background)
+
+   diff-changed :foreground diff-chg-fg-hl
+                :background (blend 70 diff-chg-bg default :background)
+   diff-changed-unspecified :foreground diff-chg-fg-hl
+                            :background (blend 70 diff-chg-bg default :background)
+   diff-indicator-changed :foreground diff-chg-fg-hl
+                          :background (blend 70 diff-chg-bg default :background)
+   diff-refine-changed :foreground diff-chg-fg-hl
+                       :background (blend 70 diff-chg-word default :background)
+
+   smerge-base :background (blend 70 diff-chg-bg default :background)
+   smerge-refined-changed :background (blend 70 diff-chg-word default :background)
+   smerge-markers :background (darker 5 default :background)
+                  :foreground unspecified))
 
 ;;; ag-themes-base16-tokyo-night-light-theme.el ends here

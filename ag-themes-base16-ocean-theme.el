@@ -72,13 +72,39 @@
    magit-diff-hunk-heading-highlight :background "#2f363f" :foreground unspecified
    diff-refine-added :foreground "#a3be70" :background "#2b3b34"
    diff-refine-removed :foreground "#ef6160" :background "#3b2c2b"
+   diff-refine-changed :foreground "#e0c07a" :background "#3b372b"
    smerge-refined-added :foreground "#a3be70" :background "#2b3b34"
    smerge-refined-removed :foreground "#ef6160" :background "#3b2c2b"
+   smerge-refined-changed :foreground "#e0c07a" :background "#3b372b"
    forge-topic-closed :strike-through t
    ediff-current-diff-A :foreground "#dd828b" :background "#443238"
    ediff-fine-diff-A :foreground "#db5e6c" :background "#603238"
    ediff-current-diff-B :foreground base0B :background "#2a3a2c"
    ediff-fine-diff-B :foreground "#aadd7e" :background "#2e4431"
+   ediff-current-diff-C :foreground "#dcc386" :background "#3f3b2c"
+   ediff-fine-diff-C :foreground "#ddc36a" :background "#585030"
+   ediff-current-diff-Ancestor :foreground "#dcc386" :background "#3f3b2c"
+   ediff-fine-diff-Ancestor :foreground "#ddc36a" :background "#585030"
+
+   ;; The non-current regions are neutral bands, even a step darker than odd.
+   ;; Both need an explicit pair: base16 inverted them without naming a
+   ;; colour, and an unset one falls through to a grey `defface' slab.
+   ediff-even-diff-A :foreground (lighter 0 default :foreground)
+                     :background (lighter 4 default :background)
+   ediff-even-diff-B :foreground (lighter 0 default :foreground)
+                     :background (lighter 4 default :background)
+   ediff-even-diff-C :foreground (lighter 0 default :foreground)
+                     :background (lighter 4 default :background)
+   ediff-even-diff-Ancestor :foreground (lighter 0 default :foreground)
+                            :background (lighter 4 default :background)
+   ediff-odd-diff-A :foreground (lighter 0 default :foreground)
+                    :background (lighter 9 default :background)
+   ediff-odd-diff-B :foreground (lighter 0 default :foreground)
+                    :background (lighter 9 default :background)
+   ediff-odd-diff-C :foreground (lighter 0 default :foreground)
+                    :background (lighter 9 default :background)
+   ediff-odd-diff-Ancestor :foreground (lighter 0 default :foreground)
+                           :background (lighter 9 default :background)
 
    diff-hl-change :foreground base03 :background base0D
    diff-hl-delete :foreground base03 :background base08

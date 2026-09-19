@@ -81,9 +81,31 @@
    diff-indicator-removed :foreground "#d80d0d"
    diff-refine-removed :foreground "#d80d0d" :background "#fdb8c0"
    diff-refine-added :foreground "#325e0b" :background "#acf2bd"
+   diff-refine-changed :foreground "#7d4e00" :background "#ffe57f"
    smerge-upper :foreground "#d80d0d" :background "#fdb8c0"
    smerge-lower :foreground "#325e0b" :background "#acf2bd"
    forge-topic-closed :strike-through t
+
+   ediff-current-diff-A :foreground "#d80d0d" :background "#ffeef0"
+   ediff-fine-diff-A :foreground "#d80d0d" :background "#fdb8c0"
+   ediff-current-diff-B :foreground "#325e0b" :background "#e6ffed"
+   ediff-fine-diff-B :foreground "#325e0b" :background "#acf2bd"
+   ediff-current-diff-C :foreground "#7d4e00" :background "#fff8c5"
+   ediff-fine-diff-C :foreground "#7d4e00" :background "#ffe57f"
+   ediff-current-diff-Ancestor :foreground "#7d4e00" :background "#fff8c5"
+   ediff-fine-diff-Ancestor :foreground "#7d4e00" :background "#ffe57f"
+
+   ;; The non-current regions are neutral bands, even a step lighter than odd.
+   ;; Both need an explicit pair: a base theme that inverted them named no
+   ;; colour, and an unset one falls through to a grey `defface' slab.
+   ediff-even-diff-A :foreground (lighter 0 default :foreground) :background bg-darker
+   ediff-even-diff-B :foreground (lighter 0 default :foreground) :background bg-darker
+   ediff-even-diff-C :foreground (lighter 0 default :foreground) :background bg-darker
+   ediff-even-diff-Ancestor :foreground (lighter 0 default :foreground) :background bg-darker
+   ediff-odd-diff-A :foreground (lighter 0 default :foreground) :background bg-accent
+   ediff-odd-diff-B :foreground (lighter 0 default :foreground) :background bg-accent
+   ediff-odd-diff-C :foreground (lighter 0 default :foreground) :background bg-accent
+   ediff-odd-diff-Ancestor :foreground (lighter 0 default :foreground) :background bg-accent
 
    trailing-whitespace :background bg-accent
    ahs-face :background bg-accent-light

@@ -84,6 +84,34 @@
                         :background (blend 18 diff-green default :background)
    ediff-fine-diff-B :foreground diff-green-hl
                      :background (blend 38 diff-green default :background)
+   ediff-current-diff-C :foreground diff-amber-hl
+                        :background (blend 18 diff-amber default :background)
+   ediff-fine-diff-C :foreground diff-amber-hl
+                     :background (blend 38 diff-amber default :background)
+   ediff-current-diff-Ancestor :foreground diff-amber-hl
+                               :background (blend 18 diff-amber default :background)
+   ediff-fine-diff-Ancestor :foreground diff-amber-hl
+                            :background (blend 38 diff-amber default :background)
+
+   ;; The non-current regions are neutral bands, even a step darker than odd.
+   ;; Both need an explicit pair: base16 inverted them without naming a
+   ;; colour, and an unset one falls through to a grey `defface' slab.
+   ediff-even-diff-A :foreground (lighter 0 default :foreground)
+                     :background (lighter 4 default :background)
+   ediff-even-diff-B :foreground (lighter 0 default :foreground)
+                     :background (lighter 4 default :background)
+   ediff-even-diff-C :foreground (lighter 0 default :foreground)
+                     :background (lighter 4 default :background)
+   ediff-even-diff-Ancestor :foreground (lighter 0 default :foreground)
+                            :background (lighter 4 default :background)
+   ediff-odd-diff-A :foreground (lighter 0 default :foreground)
+                    :background (lighter 9 default :background)
+   ediff-odd-diff-B :foreground (lighter 0 default :foreground)
+                    :background (lighter 9 default :background)
+   ediff-odd-diff-C :foreground (lighter 0 default :foreground)
+                    :background (lighter 9 default :background)
+   ediff-odd-diff-Ancestor :foreground (lighter 0 default :foreground)
+                           :background (lighter 9 default :background)
 
    ;; Conflict and whitespace faces default to near-white slabs on a dark
    ;; background; amber carries the base side, as it does on GitHub.

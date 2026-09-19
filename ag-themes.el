@@ -88,8 +88,16 @@ saturate, desaturate, blend)."
    ((and (symbolp form) (assq form palette))
     (cdr (assq form palette)))
    ((consp form)
-    (cons (ag-themes--substitute-palette (car form) palette)
-          (ag-themes--substitute-palette (cdr form) palette)))
+    ;; Walk the cdr chain iteratively; recursing it hits `max-lisp-eval-depth'
+    ;; on a long :faces list, and the macro expands eagerly at load time.
+    (let ((tail form) acc)
+      (while (consp tail)
+        (push (ag-themes--substitute-palette (car tail) palette) acc)
+        (setq tail (cdr tail)))
+      (let ((result (and tail (ag-themes--substitute-palette tail palette))))
+        (while acc
+          (setq result (cons (pop acc) result)))
+        result)))
    (t form)))
 
 (defun ag-themes--parse-flat-faces (flat-list)
@@ -235,6 +243,22 @@ a transform's source is missing."
       ;; Not a transform expression - return as literal
       value)))
 
+(defconst ag-themes--no-inverse-video-faces
+  '(diff-refine-added diff-refine-changed diff-refine-removed
+    smerge-refined-added smerge-refined-changed smerge-refined-removed
+    ediff-current-diff-A ediff-current-diff-B
+    ediff-current-diff-C ediff-current-diff-Ancestor
+    ediff-fine-diff-A ediff-fine-diff-B
+    ediff-fine-diff-C ediff-fine-diff-Ancestor
+    ediff-even-diff-A ediff-even-diff-B
+    ediff-even-diff-C ediff-even-diff-Ancestor
+    ediff-odd-diff-A ediff-odd-diff-B
+    ediff-odd-diff-C ediff-odd-diff-Ancestor)
+  "Diff faces no base theme gets to render inverted.
+Inverting swaps the pair a theme sets, so a tuned band renders as a slab
+of its own text colour.  A theme's own `:faces' still wins, since these
+are applied before it.")
+
 (defconst ag-themes--nil-invalid-attributes
   '(:family :foundry :width :height :weight :slant :foreground :background)
   "Face attributes nil cannot unset.
@@ -271,7 +295,10 @@ MODELINE-HEIGHT sets :height on modeline-related faces when non-nil."
                         (append overrides
                                 (ag-themes--modeline-faces modeline-height))
                       overrides))
-         (all-specs (append base-faces overrides))
+         (all-specs (append base-faces
+                            (mapcar (lambda (face) (list face '(:inverse-video nil)))
+                                    ag-themes--no-inverse-video-faces)
+                            overrides))
          (resolved '()))
     ;; Sequential reduce so earlier overrides are visible to later lookups
     (dolist (entry all-specs)

@@ -130,5 +130,22 @@ reach one."
     (should (equal (cadr (assq 'org-table specs)) '((t :background unspecified))))
     (should (equal (cadr (assq 'mode-line specs)) '((t :box nil))))))
 
+(ert-deftest ag-themes-apply-lets-an-override-switch-off-inverse-video ()
+  "An override's nil beats a base theme's `:inverse-video' t.
+Left on, it swaps the foreground and background the override computed."
+  (let (specs)
+    (cl-letf (((symbol-function 'ag-themes--base-theme-faces)
+               (lambda (_theme)
+                 '((diff-refine-added (:inherit diff-added :inverse-video t)))))
+              ((symbol-function 'custom-theme-set-faces)
+               (lambda (_theme &rest args) (setq specs args))))
+      (ag-themes--apply 'probe-theme 'probe-base
+                        '(diff-refine-added :inverse-video nil
+                          :foreground "#116329" :background "#beedcb")
+                        nil))
+    (should (equal (cadr (assq 'diff-refine-added specs))
+                   '((t :inherit diff-added :inverse-video nil
+                        :foreground "#116329" :background "#beedcb"))))))
+
 (provide 'ag-themes-tests)
 ;;; ag-themes-tests.el ends here

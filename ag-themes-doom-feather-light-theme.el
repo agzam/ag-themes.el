@@ -86,6 +86,34 @@
                         :background (blend 70 diff-add-bg default :background)
    ediff-fine-diff-B :foreground diff-add-fg-hl
                      :background (blend 70 diff-add-word default :background)
+   ediff-current-diff-C :foreground diff-chg-fg-hl
+                        :background (blend 70 diff-chg-bg default :background)
+   ediff-fine-diff-C :foreground diff-chg-fg-hl
+                     :background (blend 70 diff-chg-word default :background)
+   ediff-current-diff-Ancestor :foreground diff-chg-fg-hl
+                               :background (blend 70 diff-chg-bg default :background)
+   ediff-fine-diff-Ancestor :foreground diff-chg-fg-hl
+                            :background (blend 70 diff-chg-word default :background)
+
+   ;; The non-current regions are neutral bands, even a step lighter than odd.
+   ;; Both need an explicit pair: base themes that inverted them named no
+   ;; colour, and an unset one falls through to a grey `defface' slab.
+   ediff-even-diff-A :foreground (lighter 0 default :foreground)
+                     :background (darker 3 default :background)
+   ediff-even-diff-B :foreground (lighter 0 default :foreground)
+                     :background (darker 3 default :background)
+   ediff-even-diff-C :foreground (lighter 0 default :foreground)
+                     :background (darker 3 default :background)
+   ediff-even-diff-Ancestor :foreground (lighter 0 default :foreground)
+                            :background (darker 3 default :background)
+   ediff-odd-diff-A :foreground (lighter 0 default :foreground)
+                    :background (darker 7 default :background)
+   ediff-odd-diff-B :foreground (lighter 0 default :foreground)
+                    :background (darker 7 default :background)
+   ediff-odd-diff-C :foreground (lighter 0 default :foreground)
+                    :background (darker 7 default :background)
+   ediff-odd-diff-Ancestor :foreground (lighter 0 default :foreground)
+                           :background (darker 7 default :background)
 
    ;; Conflict and whitespace faces default to saturated slabs; amber carries
    ;; the base side, as it does on GitHub.

@@ -158,6 +158,11 @@
    gnus-cite-1 :foreground "SkyBlue3"
    gnus-cite-2 :foreground "light sky blue"
    gnus-cite-3 :foreground "yellow3"
+   ;; quoted mail by depth, every level at a contrast of 5:1 or more
+   message-cited-text-1 :foreground "#316ea7"
+   message-cited-text-2 :foreground "#24775d"
+   message-cited-text-3 :foreground "#7c6814"
+   message-cited-text-4 :foreground "#a31db1"
    mm-uu-extract :background "#efeae9"
 
    ivy-posframe :background (darker 1 default :background)

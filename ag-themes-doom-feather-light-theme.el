@@ -147,6 +147,12 @@
    smerge-base :background (blend 70 diff-chg-bg default :background)
    smerge-refined-changed :background (blend 70 diff-chg-word default :background)
    smerge-markers :background (darker 5 default :background)
-                  :foreground unspecified))
+                  :foreground unspecified
+
+   ;; quoted mail by depth, every level at a contrast of 5:1 or more
+   message-cited-text-1 :foreground "#006790"
+   message-cited-text-2 :foreground "#006b5e"
+   message-cited-text-3 :foreground "#7e5800"
+   message-cited-text-4 :foreground "#bb0d4f"))
 
 ;;; ag-themes-doom-feather-light-theme.el ends here

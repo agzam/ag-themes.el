@@ -154,6 +154,12 @@
    tab-bar-tab-inactive :background (lighter 0 default :background)
                         :foreground (darker 35 default :foreground)
                         :box unspecified
-   vertico-current :background bg-accent))
+   vertico-current :background bg-accent
+
+   ;; quoted mail by depth, every level at a contrast of 5:1 or more
+   message-cited-text-1 :foreground "#95aec7"
+   message-cited-text-2 :foreground "#95c7ae"
+   message-cited-text-3 :foreground "#c7c795"
+   message-cited-text-4 :foreground "#ae95c7"))
 
 ;;; ag-themes-base16-ashes-theme.el ends here

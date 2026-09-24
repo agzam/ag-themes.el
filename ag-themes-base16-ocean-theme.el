@@ -172,6 +172,11 @@
    ivy-posframe :inherit default
 
    notmuch-wash-cited-text :foreground base03
+   ;; quoted mail by depth, every level at a contrast of 5:1 or more
+   message-cited-text-1 :foreground "#9fafbe"
+   message-cited-text-2 :foreground base0B
+   message-cited-text-3 :foreground base0A
+   message-cited-text-4 :foreground "#c2a3bc"
    message-header-to :foreground base0C
    notmuch-crypto-signature-unknown :foreground base0E :background unspecified
    notmuch-crypto-signature-good-key :foreground base0A :background unspecified

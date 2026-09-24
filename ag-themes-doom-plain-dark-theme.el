@@ -146,6 +146,13 @@
    smerge-base :background (blend 13 diff-amber default :background)
    smerge-refined-changed :background (blend 38 diff-amber default :background)
    smerge-markers :background (lighter 9 default :background)
-                  :foreground unspecified))
+                  :foreground unspecified
+
+   ;; quoted mail by depth, every level at a contrast of 5:1 or more; the
+   ;; base theme gives every level its body color
+   message-cited-text-1 :foreground "#8fa1b3"
+   message-cited-text-2 :foreground "#96b388"
+   message-cited-text-3 :foreground "#b6a785"
+   message-cited-text-4 :foreground "#bc898d"))
 
 ;;; ag-themes-doom-plain-dark-theme.el ends here
